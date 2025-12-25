@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'pages/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,12 +20,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Nexus',
-      home: Scaffold(
-        appBar: AppBar(
-          backgroundColor: Color.fromRGBO(160, 156, 176, 1),
-          title: Text("Nexus App", style: TextStyle(color: Colors.white)),
-        ),
-      ),
+      home: const SplashPage(), 
     );
   }
 }
