@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import './pages/todo_module/todo_hub.dart';
+import 'pages/splash_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,12 +50,7 @@ class MyApp extends StatelessWidget {
           backgroundColor: WidgetStateProperty.all(Color(0xFFF9FAFB)),
         ),
       ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text("Nexus", style: TextStyle(color: Colors.white)),
-        ),
-      ),
-      //home: HomePage(),
+      home: const SplashPage(), 
     );
   }
 }
