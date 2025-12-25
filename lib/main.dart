@@ -30,15 +30,19 @@ class MyApp extends StatelessWidget {
           shape: CircleBorder(),
         ),
         searchBarTheme: SearchBarThemeData(
+          constraints: BoxConstraints.tightFor(height: 50),
           side: WidgetStateProperty.resolveWith<BorderSide>((states) {
             if (states.contains(WidgetState.focused)) {
-              return BorderSide(color: Color.fromARGB(255, 87, 67, 168), width: 1.0);
-            } 
+              return BorderSide(
+                color: Color.fromARGB(255, 87, 67, 168),
+                width: 1.0,
+              );
+            }
             // else if (states.contains(
             //   WidgetState.pressed | WidgetState.hovered,
             // )) {
             //   return BorderSide(color: Color(0xFF413476), width: 1.0);
-            // } 
+            // }
             else {
               return BorderSide(color: Color(0xFFE5E7EB), width: 1.0);
             }
@@ -48,9 +52,14 @@ class MyApp extends StatelessWidget {
           ),
           elevation: WidgetStateProperty.all(0.0),
           backgroundColor: WidgetStateProperty.all(Color(0xFFF9FAFB)),
+          shape: WidgetStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+          ),
+          padding: WidgetStateProperty.all(EdgeInsets.symmetric(vertical: 0.0, horizontal: 0.0))
         ),
       ),
       home: const SplashPage(), 
     );
   }
 }
+
