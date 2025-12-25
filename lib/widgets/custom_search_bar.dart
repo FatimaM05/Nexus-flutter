@@ -9,10 +9,12 @@ class CustomSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SearchBar(
       hintText: hint,
-      leading: const Icon(
+      leading: Padding(
+        padding: EdgeInsets.only(left: 15.0, right: 8.0),
+        child: const Icon(
         Icons.search,
         color: Color.fromRGBO(153, 161, 175, 1),
-      ),
+      ),),
       onChanged: (value) {},
       onSubmitted: (value) {
         onSearch(value);
