@@ -17,12 +17,20 @@ class SingleListTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20.0),
         border: Border.all(color: Color(0xFFA09CB0), width: 1.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha:0.08, red:0, green:0, blue:0),
+            blurRadius: 8,
+            offset: Offset(0, 2),
+          ),
+        ],
       ),
       child: ListTile(
         leading: Icon(icon, size: 23.0, weight: 10.0, color: Color(0xFFA09CB0)),
-        title: Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400)),
+        title: Text(title, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w400, color: Color(0XFF333333))),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
