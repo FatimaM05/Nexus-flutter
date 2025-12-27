@@ -19,6 +19,7 @@ class MyApp extends StatelessWidget {
       title: 'Nexus',
       //home: const HomePage(),
       theme: ThemeData(
+        scaffoldBackgroundColor: Color(0xFFA09CB0),
         appBarTheme: AppBarThemeData(
           backgroundColor: Color.fromRGBO(160, 156, 176, 1),
           foregroundColor: Colors.white,
