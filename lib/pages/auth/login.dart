@@ -83,6 +83,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             _obscurePassword = !_obscurePassword;
                           });
                         },
+                        constraints: const BoxConstraints(
+                          minWidth: 48,
+                          minHeight: 48,
+                        ),
+                        splashRadius: 24, 
                       ),
                     ),
                   ),
