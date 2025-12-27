@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math; 
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
+import "./auth/login.dart";
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -24,12 +26,24 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     )..repeat(); 
 
     // Navigate Home
-    Timer(const Duration(seconds: 6), () {
+    Timer(const Duration(seconds: 6), () async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false; 
+    if (!mounted) return;
+
+
+    if (isLoggedIn) {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const HomePage()),
       );
-    });
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => LoginScreen()),
+      );
+    }
+  });
   }
 
   @override

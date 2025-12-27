@@ -1,0 +1,125 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../home_screen.dart'; 
+
+class LoginScreen extends StatelessWidget {
+  const LoginScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // Header Container
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 20),
+              decoration: const BoxDecoration(
+                color: Color.fromRGBO(160, 156, 176, 100),
+                borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
+              ),
+              child: Column(
+                children: [
+                  Image.asset(
+                    'assets/images/Logo.png', 
+                    height: 100,
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'Sign in to your Account',
+                    style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Please enter your credentials to continue.',
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
+                ],
+              ),
+            ),
+
+            // Login Form
+            Padding(
+              padding: const EdgeInsets.all(30.0),
+              child: Column(
+                children: [
+                  // Email login
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Email',
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  // Password
+                  TextField(
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: 'Password',
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      suffixIcon: const Icon(Icons.visibility_off_outlined, color: Color.fromRGBO(182, 184, 184, 100)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {},
+                      child: const Text('Forgot Password', style: TextStyle(color: Color.fromRGBO(63, 49, 116, 100),)),
+                    ),
+                  ),
+                  const SizedBox(height: 30),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 60,
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        // Save login state
+                        SharedPreferences prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('isLoggedIn', true);
+
+                        // Navigate to HomePage
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const HomePage()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFA6A2BD),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      ),
+                      child: const Text('Login', style: TextStyle(fontSize: 20, color: Colors.white)),
+                    ),
+                  ),
+                  const SizedBox(height: 40),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text("Don't have account? ", style: TextStyle(color: Color.fromRGBO(182, 182, 184, 100))),
+                      GestureDetector(
+                        onTap: () {},
+                        child: const Text(
+                          "Register",
+                          style: TextStyle(
+                            color: Color.fromRGBO(63, 49, 116, 100),
+                            fontWeight: FontWeight.bold,
+                            decoration: TextDecoration.underline
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
