@@ -56,11 +56,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 20),
                   const Text(
+                    textAlign: TextAlign.center,
                     'Register your Account',
                     style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   const Text(
+                    textAlign: TextAlign.center,
                     'Please fill in the details to create your account.',
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
@@ -167,7 +169,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: primaryPurple, width: 2),
+          borderSide: BorderSide(color: const Color.fromARGB(255, 126, 72, 143), width: 2),
         ),
         suffixIcon: isPassword
             ? IconButton(
