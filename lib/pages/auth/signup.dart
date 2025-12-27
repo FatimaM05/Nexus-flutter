@@ -134,7 +134,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         child: Text(
                           "Log in",
                           style: TextStyle(
-                            color: primaryPurple,
+                            color: Colors.deepPurple,
                             fontWeight: FontWeight.bold,
                             decoration: TextDecoration.underline,
                           ),

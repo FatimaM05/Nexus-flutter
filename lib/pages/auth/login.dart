@@ -3,8 +3,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import "../auth/signup.dart";
 import '../home_screen.dart'; 
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +37,13 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   const Text(
                     'Sign in to your Account',
+                    textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   const Text(
                     'Please enter your credentials to continue.',
+                    textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
                 ],
@@ -56,15 +65,25 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Password
+                  // Password with toggle eye
                   TextField(
-                    obscureText: true,
+                    obscureText: _obscurePassword,
                     decoration: InputDecoration(
                       hintText: 'Password',
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      suffixIcon: const Icon(Icons.visibility_off_outlined, color: Color.fromRGBO(182, 184, 184, 100)),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+                      hintStyle: const TextStyle(color: Colors.blueGrey),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          color: Color.fromRGBO(182, 184, 184, 100),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
                   ),
                   Align(
