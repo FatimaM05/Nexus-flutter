@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import "../auth/signup.dart";
 import '../home_screen.dart'; 
 
 class LoginScreen extends StatelessWidget {
@@ -90,7 +91,7 @@ class LoginScreen extends StatelessWidget {
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFA6A2BD),
+                        backgroundColor: const Color.fromRGBO(160, 156, 176, 100),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
                       child: const Text('Login', style: TextStyle(fontSize: 20, color: Colors.white)),
@@ -102,13 +103,18 @@ class LoginScreen extends StatelessWidget {
                     children: [
                       const Text("Don't have account? ", style: TextStyle(color: Color.fromRGBO(182, 182, 184, 100))),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SignUpScreen()),
+                          );
+                        },
                         child: const Text(
                           "Register",
                           style: TextStyle(
                             color: Color.fromRGBO(63, 49, 116, 100),
                             fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline
+                            decoration: TextDecoration.underline,
                           ),
                         ),
                       ),
