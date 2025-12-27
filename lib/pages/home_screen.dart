@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_app_bar.dart';
+import '../pages/dashboard/dashboard_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -28,12 +29,21 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
   final List<int> _history = [0];
 
-  final List<Widget> _pages = [
-    const Center(child: Text("Dashboard Page")),
-    const Center(child: Text("To-Do Page")),
-    const Center(child: Text("Journal Page")),
-    const Center(child: Text("Highlights Page")),
-  ];
+  late final List<Widget> _pages;
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      DashboardScreen(goToTodo: _goToTodo), 
+      const Center(child: Text("To-Do Page")),
+      const Center(child: Text("Journal Page")),
+      const Center(child: Text("Highlights Page")),
+    ];
+  }
+
+    void _goToTodo() {
+    _onTabSelected(1);
+  }
 
   void _onTabSelected(int index) {
     if (_history.isEmpty || _history.last != index) {
@@ -56,7 +66,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // icons fro btoom navbar
+    // icons for bottom navbar
     final dashboardIcon =
         _selectedIndex == 0 ? Icons.home_filled : Icons.home_outlined;
     final todoIcon =
