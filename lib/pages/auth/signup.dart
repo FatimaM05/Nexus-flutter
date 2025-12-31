@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import './login.dart';
 
 class SignUpScreen extends StatefulWidget {
+  
   const SignUpScreen({super.key});
 
   @override
@@ -9,29 +11,48 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
   final Color primaryPurple = const Color.fromRGBO(160, 156, 176, 100); 
   final Color darkText = Colors.grey;
 
-  void _handleRegister() {
-    // rn just Showing Success Message and goin to loginpage
+  void _handleRegister() async {
+  try {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      throw 'Passwords do not match';
+    }
+
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: _emailController.text.trim(),
+      password: _passwordController.text.trim(),
+    );
+
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Signup Successful!'),
         backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
       ),
     );
 
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
-    });
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(e.toString()),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -77,9 +98,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 children: [
                   _buildTextField(hint: 'Name'),
                   const SizedBox(height: 15),
-                  _buildTextField(hint: 'Email'),
+                  _buildTextField(hint: 'Email', controller: _emailController,),
                   const SizedBox(height: 15),
                   _buildTextField(
+                    controller: _passwordController,
                     hint: 'Password',
                     isPassword: true,
                     obscureText: _obscurePassword,
@@ -87,6 +109,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
                   const SizedBox(height: 15),
                   _buildTextField(
+                    controller: _confirmPasswordController,
                     hint: 'Confirm Password',
                     isPassword: true,
                     obscureText: _obscureConfirmPassword,
@@ -152,12 +175,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _buildTextField({
+     TextEditingController? controller,
     required String hint,
     bool isPassword = false,
     bool obscureText = false,
     VoidCallback? onToggle,
   }) {
     return TextField(
+      controller: controller,
       obscureText: obscureText,
       decoration: InputDecoration(
         hintText: hint,
