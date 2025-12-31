@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:nexus/widgets/custom_search_bar.dart';
 import 'package:nexus/widgets/journal_entry_card.dart';
 import 'package:nexus/widgets/empty_journal_state.dart';
 import 'package:nexus/pages/journal/journal_detail_page.dart';
