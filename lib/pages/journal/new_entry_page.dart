@@ -90,6 +90,13 @@ class _NewEntryPageState extends State<NewEntryPage> {
         title: Text(widget.existingEntry == null ? 'New Entry' : 'Edit Entry'),
         backgroundColor: const Color.fromRGBO(160, 156, 176, 1),
         foregroundColor: Colors.white,
+        elevation: 0,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(20),
+            bottomRight: Radius.circular(20),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: _saveEntry,
@@ -97,67 +104,78 @@ class _NewEntryPageState extends State<NewEntryPage> {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: 'Title',
-                border: OutlineInputBorder(),
+
+      body: Container(
+        height: double.infinity,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                controller: _titleController,
+                decoration: const InputDecoration(
+                  labelText: 'Title',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Date: ${DateFormat('MMM dd, yyyy').format(_selectedDate)}',
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      'Date: ${DateFormat('MMM dd, yyyy').format(_selectedDate)}',
+                    ),
                   ),
-                ),
-                TextButton(
-                  onPressed: () => _selectDate(context),
-                  child: const Text('Change Date'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _contentController,
-              decoration: const InputDecoration(
-                labelText: 'Content',
-                border: OutlineInputBorder(),
-                alignLabelWithHint: true,
+                  TextButton(
+                    onPressed: () => _selectDate(context),
+                    child: const Text('Change Date'),
+                  ),
+                ],
               ),
-              maxLines: 10,
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _tagsController,
-              decoration: const InputDecoration(
-                labelText: 'Tags (comma separated)',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _contentController,
+                decoration: const InputDecoration(
+                  labelText: 'Content',
+                  border: OutlineInputBorder(),
+                  alignLabelWithHint: true,
+                ),
+                maxLines: 10,
               ),
-              onChanged: _updateTags,
-            ),
-            const SizedBox(height: 16),
-            Wrap(
-              spacing: 8.0,
-              children: _tags.map((tag) {
-                return Chip(
-                  label: Text(tag),
-                  onDeleted: () {
-                    setState(() {
-                      _tags.remove(tag);
-                      _tagsController.text = _tags.join(', ');
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-          ],
+              const SizedBox(height: 16),
+              TextField(
+                controller: _tagsController,
+                decoration: const InputDecoration(
+                  labelText: 'Tags (comma separated)',
+                  border: OutlineInputBorder(),
+                ),
+                onChanged: _updateTags,
+              ),
+              const SizedBox(height: 16),
+              Wrap(
+                spacing: 8.0,
+                children: _tags.map((tag) {
+                  return Chip(
+                    label: Text(tag),
+                    onDeleted: () {
+                      setState(() {
+                        _tags.remove(tag);
+                        _tagsController.text = _tags.join(', ');
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -100,67 +100,107 @@ class _JournalListPageState extends State<JournalListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Journal',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        backgroundColor: const Color.fromRGBO(160, 156, 176, 1),
-        foregroundColor: Colors.white,
-      ),
-      body: Column(
-        children: [
-          // Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: CustomSearchBar(
-              onSearch: _onSearch,
-              hint: 'Search entries...',
-            ),
+      body: Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
           ),
-          // Entries count
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${_filteredEntries.length} ${_filteredEntries.length == 1 ? 'entry' : 'entries'}',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color.fromRGBO(153, 161, 175, 1),
+        ),
+        child: Column(
+          children: [
+            // Search Bar - REMOVED DUPLICATE "JOURNAL" TITLE
+            Container(
+              margin: const EdgeInsets.all(16.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(249, 250, 251, 1),
+                borderRadius: BorderRadius.circular(30.0),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.search,
+                    color: Color.fromRGBO(160, 156, 176, 1),
+                    size: 20,
                   ),
-                ),
-                if (_searchQuery.isNotEmpty)
-                  TextButton(
-                    onPressed: () {
-                      _onSearch('');
-                    },
-                    child: const Text(
-                      'Clear search',
-                      style: TextStyle(color: Color.fromRGBO(160, 156, 176, 1)),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      onChanged: _onSearch,
+                      decoration: const InputDecoration(
+                        hintText: 'Search entries...',
+                        hintStyle: TextStyle(
+                          color: Color.fromRGBO(160, 156, 176, 0.8),
+                          fontSize: 14,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 16),
+                      ),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color.fromRGBO(51, 51, 51, 1),
+                      ),
                     ),
                   ),
-              ],
+                ],
+              ),
             ),
-          ),
-          // Entries List or Empty State
-          Expanded(
-            child: _filteredEntries.isEmpty
-                ? EmptyJournalState(onCreateEntry: _addNewEntry)
-                : ListView.builder(
-                    padding: const EdgeInsets.only(bottom: 80),
-                    itemCount: _filteredEntries.length,
-                    itemBuilder: (context, index) {
-                      final entry = _filteredEntries[index];
-                      return JournalEntryCard(
-                        entry: entry,
-                        onTap: () => _viewEntryDetail(entry),
-                      );
-                    },
+
+            // Entries count - CHANGED TO MATCH SCREENSHOT
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    '${_filteredEntries.length} entries', // ← CHANGED: Simplified text
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color.fromRGBO(153, 161, 175, 1),
+                    ),
                   ),
-          ),
-        ],
+                  if (_searchQuery.isNotEmpty)
+                    TextButton(
+                      onPressed: () {
+                        _onSearch('');
+                      },
+                      child: const Text(
+                        'Clear search',
+                        style: TextStyle(
+                          color: Color.fromRGBO(160, 156, 176, 1),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+
+            const Divider(
+              height: 20,
+              thickness: 1,
+              color: Color.fromRGBO(229, 231, 235, 1),
+            ),
+
+            // Entries List or Empty State
+            Expanded(
+              child: _filteredEntries.isEmpty
+                  ? EmptyJournalState(onCreateEntry: _addNewEntry)
+                  : ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 80),
+                      itemCount: _filteredEntries.length,
+                      itemBuilder: (context, index) {
+                        final entry = _filteredEntries[index];
+                        return JournalEntryCard(
+                          entry: entry,
+                          onTap: () => _viewEntryDetail(entry),
+                        );
+                      },
+                    ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color.fromRGBO(160, 156, 176, 1),
