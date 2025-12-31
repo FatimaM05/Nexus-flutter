@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import "../auth/signup.dart";
 import '../home_screen.dart'; 
 
@@ -11,6 +12,9 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
   bool _obscurePassword = true;
 
   @override
@@ -57,6 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   // Email login
                   TextField(
+                    controller: _emailController,
                     decoration: InputDecoration(
                       hintText: 'Email',
                       hintStyle: const TextStyle(color: Colors.grey),
@@ -68,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // Password with toggle eye
                   TextField(
                     obscureText: _obscurePassword,
+                    controller: _passwordController,
                     decoration: InputDecoration(
                       hintText: 'Password',
                       hintStyle: const TextStyle(color: Colors.blueGrey),
@@ -104,15 +110,31 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 60,
                     child: ElevatedButton(
                       onPressed: () async {
-                        // Save login state
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        await prefs.setBool('isLoggedIn', true);
+                        try {
+                          final email = _emailController.text.trim();
+                          final password = _passwordController.text.trim();
 
-                        // Navigate to HomePage
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const HomePage()),
-                        );
+                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                          );
+
+                          // Save login state (optional)
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('isLoggedIn', true);
+
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const HomePage()),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(e.toString()),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color.fromRGBO(160, 156, 176, 100),
