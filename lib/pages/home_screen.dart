@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/custom_app_bar.dart';
 import '../pages/dashboard/dashboard_screen.dart';
+import '../pages/todo_module/todo_hub.dart';
+import '../pages/journal/journal_list_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -35,8 +37,8 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     _pages = [
       DashboardScreen(goToTodo: _goToTodo), 
-      const Center(child: Text("To-Do Page")),
-      const Center(child: Text("Journal Page")),
+      ToDoHub(),
+      JournalListPage(),
       const Center(child: Text("Highlights Page")),
     ];
   }
