@@ -49,10 +49,6 @@ class _ToDoHubState extends State<ToDoHub> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromRGBO(160, 156, 176, 1),
-      appBar: AppBar(
-        title: Text("To Do Hub", style: TextStyle(color: Colors.white)),
-        backgroundColor: Color.fromRGBO(160, 156, 176, 1),
-      ),
       body:
           //Main Body
           SafeArea(
