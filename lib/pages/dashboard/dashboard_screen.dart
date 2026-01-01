@@ -4,7 +4,8 @@ import 'package:image_picker/image_picker.dart';
 
 class DashboardScreen extends StatefulWidget {
   final VoidCallback goToTodo;
-  const DashboardScreen({super.key, required this.goToTodo});
+  final String username;
+  const DashboardScreen({super.key, required this.goToTodo, required this.username,});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -25,7 +26,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -38,8 +39,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Good Morning, Sara",
+            Text(
+              "Good Morning, ${widget.username}",
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
