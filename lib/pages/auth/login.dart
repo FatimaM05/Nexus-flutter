@@ -1,9 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import "../auth/signup.dart";
 import '../home_screen.dart'; 
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _obscurePassword = true;
 
   @override
   Widget build(BuildContext context) {
@@ -29,11 +41,13 @@ class LoginScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   const Text(
                     'Sign in to your Account',
+                    textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 10),
                   const Text(
                     'Please enter your credentials to continue.',
+                    textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
                 ],
@@ -47,6 +61,7 @@ class LoginScreen extends StatelessWidget {
                 children: [
                   // Email login
                   TextField(
+                    controller: _emailController,
                     decoration: InputDecoration(
                       hintText: 'Email',
                       hintStyle: const TextStyle(color: Colors.grey),
@@ -55,15 +70,31 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // Password
+                  // Password with toggle eye
                   TextField(
-                    obscureText: true,
+                    obscureText: _obscurePassword,
+                    controller: _passwordController,
                     decoration: InputDecoration(
                       hintText: 'Password',
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      suffixIcon: const Icon(Icons.visibility_off_outlined, color: Color.fromRGBO(182, 184, 184, 100)),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+                      hintStyle: const TextStyle(color: Colors.blueGrey),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          color: Color.fromRGBO(182, 184, 184, 100),
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                        constraints: const BoxConstraints(
+                          minWidth: 48,
+                          minHeight: 48,
+                        ),
+                        splashRadius: 24, 
+                      ),
                     ),
                   ),
                   Align(
@@ -79,18 +110,34 @@ class LoginScreen extends StatelessWidget {
                     height: 60,
                     child: ElevatedButton(
                       onPressed: () async {
-                        // Save login state
-                        SharedPreferences prefs = await SharedPreferences.getInstance();
-                        await prefs.setBool('isLoggedIn', true);
+                        try {
+                          final email = _emailController.text.trim();
+                          final password = _passwordController.text.trim();
 
-                        // Navigate to HomePage
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (_) => const HomePage()),
-                        );
+                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                          );
+
+                          // Save login state (optional)
+                          SharedPreferences prefs = await SharedPreferences.getInstance();
+                          await prefs.setBool('isLoggedIn', true);
+
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (_) => const HomePage()),
+                          );
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(e.toString()),
+                              backgroundColor: Colors.red,
+                            ),
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFA6A2BD),
+                        backgroundColor: const Color.fromRGBO(160, 156, 176, 100),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
                       child: const Text('Login', style: TextStyle(fontSize: 20, color: Colors.white)),
@@ -102,13 +149,18 @@ class LoginScreen extends StatelessWidget {
                     children: [
                       const Text("Don't have account? ", style: TextStyle(color: Color.fromRGBO(182, 182, 184, 100))),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const SignUpScreen()),
+                          );
+                        },
                         child: const Text(
                           "Register",
                           style: TextStyle(
                             color: Color.fromRGBO(63, 49, 116, 100),
                             fontWeight: FontWeight.bold,
-                            decoration: TextDecoration.underline
+                            decoration: TextDecoration.underline,
                           ),
                         ),
                       ),
