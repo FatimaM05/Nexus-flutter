@@ -114,18 +114,25 @@ class _LoginScreenState extends State<LoginScreen> {
                           final email = _emailController.text.trim();
                           final password = _passwordController.text.trim();
 
-                          await FirebaseAuth.instance.signInWithEmailAndPassword(
+                          UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
                             email: email,
                             password: password,
                           );
 
-                          // Save login state (optional)
+                          // Save login state 
                           SharedPreferences prefs = await SharedPreferences.getInstance();
                           await prefs.setBool('isLoggedIn', true);
 
+                          // Get the username from Firebase
+                          String username = userCredential.user?.displayName ?? "User";
+
+                          // Save login state locally
+                          await prefs.setBool('isLoggedIn', true);
+                          await prefs.setString('username', username); 
+
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (_) => const HomePage()),
+                            MaterialPageRoute(builder: (_) => HomePage(username: username)),
                           );
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(

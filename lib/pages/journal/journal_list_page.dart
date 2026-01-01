@@ -4,6 +4,7 @@ import 'package:nexus/widgets/empty_journal_state.dart';
 import 'package:nexus/pages/journal/journal_detail_page.dart';
 import 'package:nexus/pages/journal/new_entry_page.dart';
 import 'package:nexus/models/journal_entry.dart';
+import 'package:nexus/widgets/custom_search_bar.dart';
 
 class JournalListPage extends StatefulWidget {
   const JournalListPage({super.key});

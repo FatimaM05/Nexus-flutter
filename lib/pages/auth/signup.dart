@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import './login.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -11,6 +12,8 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
+
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
@@ -27,10 +30,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
       throw 'Passwords do not match';
     }
 
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+     UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: _emailController.text.trim(),
       password: _passwordController.text.trim(),
     );
+
+    // Save Name of user in firebase
+    String usernameInput = _nameController.text.trim();
+    await userCredential.user?.updateDisplayName(usernameInput);
+    await userCredential.user?.reload(); 
+
+    // Save in SharedPreferences
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('username', usernameInput);
+    await prefs.setBool('isLoggedIn', true);
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -96,7 +109,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
               child: Column(
                 children: [
-                  _buildTextField(hint: 'Name'),
+                  _buildTextField(hint: 'Name', controller: _nameController,),
                   const SizedBox(height: 15),
                   _buildTextField(hint: 'Email', controller: _emailController,),
                   const SizedBox(height: 15),
@@ -175,7 +188,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Widget _buildTextField({
-     TextEditingController? controller,
+    TextEditingController? controller,
     required String hint,
     bool isPassword = false,
     bool obscureText = false,

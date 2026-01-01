@@ -33,9 +33,13 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
 
 
     if (isLoggedIn) {
+
+      // getting username
+      String username = prefs.getString('username') ?? "User";
+
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
+        MaterialPageRoute(builder: (_) => HomePage(username: username)),
       );
     } else {
       Navigator.pushReplacement(

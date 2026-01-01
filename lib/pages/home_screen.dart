@@ -13,15 +13,16 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: HomePage(),
+      home: HomePage(username: "User"),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String username;
+  const HomePage({super.key, required this.username}); 
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -36,7 +37,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _pages = [
-      DashboardScreen(goToTodo: _goToTodo), 
+      DashboardScreen(goToTodo: _goToTodo, username: widget.username), 
       ToDoHub(),
       JournalListPage(),
       const Center(child: Text("Highlights Page")),
@@ -85,6 +86,7 @@ class _HomePageState extends State<HomePage> {
       appBar: CustomAppBar(
         selectedIndex: _selectedIndex,
         onBack: _selectedIndex == 0 ? null : _onBackPressed,
+        username: widget.username,
       ),
 
       // body gotta have pages and stuff
