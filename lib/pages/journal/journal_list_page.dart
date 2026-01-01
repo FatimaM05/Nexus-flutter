@@ -33,7 +33,7 @@ class _JournalListPageState extends State<JournalListPage> {
         content:
             'Today was incredibly productive. I managed to complete the project proposal ahead of schedule and had a great meeting with the team.',
         date: DateTime(2024, 12, 6),
-        tags: ['work', 'productive', 'meeting'],
+        tags: [],
       ),
       JournalEntry(
         id: '2',
@@ -41,7 +41,7 @@ class _JournalListPageState extends State<JournalListPage> {
         content:
             'Woke up feeling grateful. Sometimes the simplest moments bring the most joy. Had coffee on the balcony and watched the sunrise.',
         date: DateTime(2024, 12, 5),
-        tags: ['personal', 'gratitude', 'morning'],
+        tags: [],
       ),
       JournalEntry(
         id: '3',
@@ -49,7 +49,7 @@ class _JournalListPageState extends State<JournalListPage> {
         content:
             'Spent the day learning new Flutter animations. The possibilities are endless when it comes to creating beautiful UIs.',
         date: DateTime(2024, 12, 4),
-        tags: ['learning', 'flutter', 'development'],
+        tags: [],
       ),
     ];
 
@@ -67,10 +67,7 @@ class _JournalListPageState extends State<JournalListPage> {
       } else {
         _filteredEntries = _entries.where((entry) {
           return entry.title.toLowerCase().contains(query.toLowerCase()) ||
-              entry.content.toLowerCase().contains(query.toLowerCase()) ||
-              entry.tags.any(
-                (tag) => tag.toLowerCase().contains(query.toLowerCase()),
-              );
+              entry.content.toLowerCase().contains(query.toLowerCase());
         }).toList();
       }
     });
@@ -110,41 +107,12 @@ class _JournalListPageState extends State<JournalListPage> {
         ),
         child: Column(
           children: [
-            // Search Bar - REMOVED DUPLICATE "JOURNAL" TITLE
+            // Search Bar
             Container(
               margin: const EdgeInsets.all(16.0),
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              decoration: BoxDecoration(
-                color: const Color.fromRGBO(249, 250, 251, 1),
-                borderRadius: BorderRadius.circular(30.0),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.search,
-                    color: Color.fromRGBO(160, 156, 176, 1),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      onChanged: _onSearch,
-                      decoration: const InputDecoration(
-                        hintText: 'Search entries...',
-                        hintStyle: TextStyle(
-                          color: Color.fromRGBO(160, 156, 176, 0.8),
-                          fontSize: 14,
-                        ),
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: Color.fromRGBO(51, 51, 51, 1),
-                      ),
-                    ),
-                  ),
-                ],
+              child: CustomSearchBar(
+                onSearch: _onSearch,
+                hint: 'Search entries...',
               ),
             ),
 

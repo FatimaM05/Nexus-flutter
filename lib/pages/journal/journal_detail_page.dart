@@ -12,10 +12,7 @@ class JournalDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Journal Entry',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
+        title: Text(entry.title, style: TextStyle(fontWeight: FontWeight.w600)),
         backgroundColor: const Color.fromRGBO(160, 156, 176, 1),
         foregroundColor: Colors.white,
         elevation: 0,
@@ -45,11 +42,15 @@ class JournalDetailPage extends StatelessWidget {
 
       body: Container(
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
+          ),
+          border: Border.all(
+            color: const Color.fromRGBO(200, 200, 200, 1),
+            width: 1.0,
           ),
         ),
         child: SingleChildScrollView(
@@ -59,18 +60,8 @@ class JournalDetailPage extends StatelessWidget {
             children: [
               // Header with date
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: Text(
-                      entry.title,
-                      style: const TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w700,
-                        color: Color.fromRGBO(51, 51, 51, 1),
-                      ),
-                    ),
-                  ),
                   Text(
                     DateFormat('MMM dd, yyyy').format(entry.date),
                     style: const TextStyle(
@@ -116,9 +107,13 @@ class JournalDetailPage extends StatelessWidget {
                           color: Color.fromRGBO(102, 102, 102, 1),
                         ),
                       ),
-                      backgroundColor: const Color.fromRGBO(240, 240, 240, 1),
+                      backgroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8.0),
+                        side: const BorderSide(
+                          color: Color.fromRGBO(200, 200, 200, 1),
+                          width: 1.0,
+                        ),
                       ),
                     );
                   }).toList(),
