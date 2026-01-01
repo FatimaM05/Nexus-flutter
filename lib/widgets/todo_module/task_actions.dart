@@ -26,6 +26,7 @@ class TaskActions extends StatelessWidget {
       leading: Icon(_getIcon(), color: Color(0xFF99A1AF), size: 27.0),
       title: Text(actionName),
       contentPadding: EdgeInsets.only(left: 30, top: 4, bottom: 4),
+      onTap: (){},
     );
   }
 }

@@ -18,6 +18,47 @@ class _TaskDetailState extends State<TaskDetail> {
     'Repeat',
     'Move to List',
   ];
+  bool isEditing = false;
+  late TextEditingController _textController;
+  late FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _textController = TextEditingController(text: widget.task?.name ?? "");
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _startEditing() {
+    setState(() {
+      isEditing = true;
+    });
+    _focusNode.requestFocus();
+  }
+
+  void _cancelEditing() {
+    setState(() {
+      isEditing = false;
+      _textController.text = widget.task?.name ?? '';
+    });
+    _focusNode.unfocus();
+  }
+
+  void _saveTask() {
+    setState(() {
+      isEditing = false;
+      widget.task?.name = _textController.text;
+      //Update the task in the db
+    });
+    _focusNode.unfocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,22 +82,51 @@ class _TaskDetailState extends State<TaskDetail> {
         child: Column(
           children: [
             ListTile(
-              leading: Icon(
-                Icons.radio_button_unchecked,
-                color: Color(0xFFA09CB0),
-                size: 30.0,
-              ),
-              title: Text(
-                widget.task?.name ??
-                    "Add Task Name", //if task is not null, get the name otherwise show placeholder text
-                style: TextStyle(
-                  color: widget.task == null
-                      ? Color(0xFF999999)
-                      : Color(0xFF333333),
-                  fontWeight: FontWeight.w500,
-                  fontSize: 22.0,
+              leading: IconButton(
+                icon: Icon(
+                  Icons.radio_button_unchecked,
+                  color: Color(0xFFA09CB0),
+                  size: 30.0,
                 ),
+                onPressed: () {},
               ),
+              title: isEditing
+                  ? TextField(
+                      controller: _textController,
+                      focusNode: _focusNode,
+                      style: TextStyle(
+                        color: Color(0xFF333333),
+                        fontWeight: FontWeight.w500,
+                        fontSize: 22.0,
+                      ),
+                      decoration: InputDecoration(
+                        border: InputBorder.none,
+                        hintText: 'Add Task Name',
+                        hintStyle: TextStyle(color: Color(0xFF999999)),
+                      ),
+                      onSubmitted: (value) => _saveTask(),
+                    )
+                  : GestureDetector(
+                      onTap: _startEditing,
+                      child: Text(
+                        _textController.text.isEmpty
+                            ? "Add Task Name"
+                            : _textController.text,
+                        style: TextStyle(
+                          color: _textController.text.isEmpty
+                              ? Color(0xFF999999)
+                              : Color(0xFF333333),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 22.0,
+                        ),
+                      ),
+                    ),
+              trailing: isEditing
+                  ? IconButton(
+                      icon: Icon(Icons.close, color: Color(0xFF999999)),
+                      onPressed: _cancelEditing,
+                    )
+                  : null,
             ),
             Divider(
               color: Color(0xFFF3F4F6),
