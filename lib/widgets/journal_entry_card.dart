@@ -15,9 +15,14 @@ class JournalEntryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-      elevation: 2,
+      color: Colors.white,
+      elevation: 0,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
+        side: const BorderSide(
+          color: Color.fromRGBO(200, 200, 200, 1),
+          width: 1.0,
+        ),
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12.0),
@@ -83,8 +88,12 @@ class JournalEntryCard extends StatelessWidget {
                         vertical: 4.0,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color.fromRGBO(240, 240, 240, 1),
+                        color: Colors.white,
                         borderRadius: BorderRadius.circular(6.0),
+                        border: Border.all(
+                          color: const Color.fromRGBO(200, 200, 200, 1),
+                          width: 1.0,
+                        ),
                       ),
                       child: Text(
                         tag,

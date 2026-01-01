@@ -14,9 +14,7 @@ class NewEntryPage extends StatefulWidget {
 class _NewEntryPageState extends State<NewEntryPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _tagsController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
-  List<String> _tags = [];
 
   @override
   void initState() {
@@ -25,8 +23,6 @@ class _NewEntryPageState extends State<NewEntryPage> {
       _titleController.text = widget.existingEntry!.title;
       _contentController.text = widget.existingEntry!.content;
       _selectedDate = widget.existingEntry!.date;
-      _tags = List.from(widget.existingEntry!.tags);
-      _tagsController.text = _tags.join(', ');
     }
   }
 
@@ -34,7 +30,6 @@ class _NewEntryPageState extends State<NewEntryPage> {
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
-    _tagsController.dispose();
     super.dispose();
   }
 
@@ -53,20 +48,10 @@ class _NewEntryPageState extends State<NewEntryPage> {
       title: _titleController.text,
       content: _contentController.text,
       date: _selectedDate,
-      tags: _tags,
+      tags: [],
     );
 
     Navigator.pop(context, entry);
-  }
-
-  void _updateTags(String value) {
-    setState(() {
-      _tags = value
-          .split(',')
-          .map((tag) => tag.trim())
-          .where((tag) => tag.isNotEmpty)
-          .toList();
-    });
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -104,14 +89,17 @@ class _NewEntryPageState extends State<NewEntryPage> {
           ),
         ],
       ),
-
       body: Container(
         height: double.infinity,
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.only(
+          borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20),
             topRight: Radius.circular(20),
+          ),
+          border: Border.all(
+            color: const Color.fromRGBO(200, 200, 200, 1),
+            width: 1.0,
           ),
         ),
         child: SingleChildScrollView(
@@ -119,60 +107,53 @@ class _NewEntryPageState extends State<NewEntryPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Text(
+                DateFormat('MM/dd/yyyy').format(_selectedDate),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                DateFormat('EEEE, MMMM d, yyyy').format(_selectedDate),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                ),
+              ),
+              const SizedBox(height: 24),
+
               TextField(
                 controller: _titleController,
                 decoration: const InputDecoration(
-                  labelText: 'Title',
-                  border: OutlineInputBorder(),
+                  border: InputBorder.none,
+                  hintText: 'Entry Title',
+                  hintStyle: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+                style: const TextStyle(
+                  fontSize: 16,
                 ),
               ),
+              const Divider(height: 20, thickness: 1),
               const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Date: ${DateFormat('MMM dd, yyyy').format(_selectedDate)}',
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () => _selectDate(context),
-                    child: const Text('Change Date'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+
               TextField(
                 controller: _contentController,
                 decoration: const InputDecoration(
-                  labelText: 'Content',
-                  border: OutlineInputBorder(),
-                  alignLabelWithHint: true,
+                  border: InputBorder.none,
+                  hintText: 'Write your thoughts...',
+                  hintStyle: TextStyle(
+                    fontSize: 16,
+                  ),
+                ),
+                style: const TextStyle(
+                  fontSize: 16,
                 ),
                 maxLines: 10,
-              ),
-              const SizedBox(height: 16),
-              TextField(
-                controller: _tagsController,
-                decoration: const InputDecoration(
-                  labelText: 'Tags (comma separated)',
-                  border: OutlineInputBorder(),
-                ),
-                onChanged: _updateTags,
-              ),
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8.0,
-                children: _tags.map((tag) {
-                  return Chip(
-                    label: Text(tag),
-                    onDeleted: () {
-                      setState(() {
-                        _tags.remove(tag);
-                        _tagsController.text = _tags.join(', ');
-                      });
-                    },
-                  );
-                }).toList(),
+                keyboardType: TextInputType.multiline,
               ),
             ],
           ),
