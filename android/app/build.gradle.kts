@@ -10,7 +10,7 @@ plugins {
 
 android {
     namespace = "com.example.nexus"
-    compileSdk = 35
+    compileSdk = 36
     
 
     compileOptions {
