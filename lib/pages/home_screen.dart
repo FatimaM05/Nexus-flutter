@@ -86,6 +86,7 @@ class _HomePageState extends State<HomePage> {
       appBar: CustomAppBar(
         selectedIndex: _selectedIndex,
         onBack: _selectedIndex == 0 ? null : _onBackPressed,
+        username: widget.username,
       ),
 
       // body gotta have pages and stuff

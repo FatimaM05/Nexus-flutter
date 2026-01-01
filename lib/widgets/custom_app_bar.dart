@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int selectedIndex;
   final VoidCallback? onBack;
+  final String username;
 
   const CustomAppBar({
     super.key,
     required this.selectedIndex,
     this.onBack,
+     required this.username,
   });
 
   @override
@@ -24,11 +26,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           padding: EdgeInsets.only(left: 20),
           child: Image.asset("assets/images/Logo.png"),
         );
-        action = const Padding(
+        action = Padding(
           padding: EdgeInsets.only(right: 20),
           child: CircleAvatar(
             backgroundColor: Color(0xFFDADAE0),
-            child: Text('S', style: TextStyle(color: Colors.white)),
+            child: Text( username.isNotEmpty ? username[0].toUpperCase() : "?", style: TextStyle(color: Colors.white)),
           ),
         );
         break;
