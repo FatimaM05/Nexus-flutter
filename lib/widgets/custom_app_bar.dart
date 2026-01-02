@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import '../pages/auth/login.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final int selectedIndex;
@@ -21,20 +23,56 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     switch (selectedIndex) {
 
       // Dashboard
-      case 0: 
+      case 0:
         leading = Padding(
-          padding: EdgeInsets.only(left: 20),
+          padding: const EdgeInsets.only(left: 20),
           child: Image.asset("assets/images/Logo.png"),
         );
+
         action = Padding(
-          padding: EdgeInsets.only(right: 20),
-          child: CircleAvatar(
-            backgroundColor: Color(0xFFDADAE0),
-            child: Text( username.isNotEmpty ? username[0].toUpperCase() : "?", style: TextStyle(color: Colors.white)),
+          padding: const EdgeInsets.only(right: 20),
+          child: PopupMenuButton<String>(
+            elevation: 8,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            offset: const Offset(0, 50),
+            onSelected: (value) async {
+              if (value == 'logout') {
+                await FirebaseAuth.instance.signOut();
+
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => false,
+                );
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'logout',
+                child: Row(
+                  children: [
+                    Icon(Icons.logout, color: Color(0xFFA09CB0)),
+                    SizedBox(width: 3),
+                    Text("Sign Out", style: TextStyle(color: Color(0xFFA09CB0)),),
+                  ],
+                ),
+              ),
+            ],
+            child: CircleAvatar(
+              backgroundColor: const Color(0xFFDADAE0),
+              child: Text(
+                username.isNotEmpty ? username[0].toUpperCase() : "?",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
         );
-        break;
-
+      break;
        // To-Do
       case 1:
         title = "To-Do Hub";
