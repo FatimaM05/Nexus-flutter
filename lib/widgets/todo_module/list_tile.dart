@@ -5,8 +5,9 @@ class SingleListTile extends StatelessWidget {
   final String title;
   final String numberOfTasks;
   final IconData icon;
+  final List<String> defaultLists = ['My Day', 'Important Tasks', 'All Tasks'];
 
-  const SingleListTile({
+  SingleListTile({
     super.key,
     required this.title,
     required this.numberOfTasks,
@@ -47,7 +48,7 @@ class SingleListTile extends StatelessWidget {
         onTap: () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => ToDoList(listName: title)),
+            MaterialPageRoute(builder: (context) => ToDoList(listName: title, isDefault: defaultLists.contains(title) ? true : false)),
           );
         },
       ),
