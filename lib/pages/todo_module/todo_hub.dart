@@ -106,20 +106,6 @@ class _ToDoHubState extends State<ToDoHub> {
               ),
             ),
           ),
-      //nav bar
-    //   bottomNavigationBar: BottomNavigationBar(
-    //   backgroundColor: Colors.white,
-    //   type: BottomNavigationBarType.fixed,
-    //   currentIndex: 1, // Lists is selected
-    //   selectedItemColor: Color(0xFFA09CB0),
-    //   unselectedItemColor: Color(0xFF99A1AF),
-    //   items: [
-    //     BottomNavigationBarItem(icon: Icon(Icons.home_outlined, size: 26), label: 'Dashboard'),
-    //     BottomNavigationBarItem(icon: Icon(Icons.inventory_outlined, size: 26), label: 'To-Do'),
-    //     BottomNavigationBarItem(icon: Icon(Icons.import_contacts_outlined, size: 26), label: 'Journal'),
-    //     BottomNavigationBarItem(icon: Icon(Icons.image_outlined, size: 26), label: 'Highlights'),
-    //   ],
-    // ),
       // New List Button
       floatingActionButton: FloatingActionButton(
         tooltip: "New List",
