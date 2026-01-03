@@ -1,7 +1,6 @@
 import "package:flutter/material.dart";
 import "../../widgets/todo_module/list_tile.dart";
-//import "../../widgets/todo_module/floating_action_button.dart";
-import "list_page.dart";
+import "./list_page.dart";
 import "../../widgets/custom_search_bar.dart";
 import '../../models/todo_list_model.dart';
 
@@ -86,9 +85,9 @@ class _ToDoHubState extends State<ToDoHub> {
                         hint: 'Search Tasks',
                       ),
                     ),
-            
+
                     SizedBox(height: 15.0),
-            
+
                     // Lists Container
                     Expanded(
                       child: Padding(
@@ -110,27 +109,133 @@ class _ToDoHubState extends State<ToDoHub> {
       floatingActionButton: FloatingActionButton(
         tooltip: "New List",
         child: Icon(Icons.add),
-        onPressed: () async {
-          final newList = await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => ToDoList(listName: null),
-            ),
-          );
-          // when we come back from the new list page, a list tile for that new list (using the list data returned by the page)will be added unless the user didnt create any list
-          if (newList != null && newList is ToDoListModel) {
-            setState(() {
-              todoLists.add(newList);
-            });
-          }
+        onPressed: () {
+          _showNewListDialog(context);
         },
+      ),
+    );
+  }
+
+  void _showNewListDialog(BuildContext context) {
+    final TextEditingController listNameController = TextEditingController();
+    final FocusNode focusNode = FocusNode();
+
+    // Auto-focus the text field
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      focusNode.requestFocus();
+    });
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                  color: Color.fromARGB(255, 148, 140, 179),
+                  width: 3.0,
+                ),
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              title: Text(
+                'New List',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+              ),
+              content: TextField(
+                controller: listNameController,
+                focusNode: focusNode,
+                autofocus: true,
+                decoration: InputDecoration(
+                  hintText: 'Enter list name',
+                  hintStyle: TextStyle(color: Color(0xFFA09CB0)),
+                  border: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFF999999)),
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(color: Color(0xFFA09CB0), width: 1),
+                  ),
+                ),
+                onChanged: (value) {
+                  setDialogState(
+                    () {},
+                  ); // Rebuild dialog to enable/disable button
+                },
+                onSubmitted: (value) {
+                  if (value.trim().isNotEmpty) {
+                    _createNewList(context, value);
+                  }
+                },
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    focusNode.dispose();
+                    listNameController.dispose();
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Color(0xFF666666)),
+                  ),
+                ),
+                TextButton(
+                  onPressed: listNameController.text.trim().isEmpty
+                      ? null
+                      : () {
+                          _createNewList(context, listNameController.text);
+                          focusNode.dispose();
+                          listNameController.dispose();
+                        },
+                  child: Text(
+                    'Create List',
+                    style: TextStyle(
+                      color: listNameController.text.trim().isEmpty
+                          ? Color.fromARGB(255, 189, 188, 188)
+                          : Color(0xFF666666),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _createNewList(BuildContext context, String listName) {
+    // call Firebase function here to cretae a new list
+    // then call the firebase function to get the list and add it to the todoLists list
+    setState(() {
+      todoLists.add(
+        ToDoListModel(
+          id: todoLists.length + 1,
+          numberOfTasks: 0,
+          name: listName,
+        ),
+      );
+    });
+
+    Navigator.pop(context); // Close dialog
+
+    // Navigate to the new list page
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            ToDoListPage(listName: listName, isDefault: false),
       ),
     );
   }
 
   Widget _buildListsView() {
     return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),  //this hides the scrollbar
+      behavior: ScrollConfiguration.of(
+        context,
+      ).copyWith(scrollbars: false), //this hides the scrollbar
       child: ListView.separated(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         padding: EdgeInsets.only(bottom: 15.0),
