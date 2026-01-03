@@ -111,16 +111,16 @@ class _ToDoHubState extends State<ToDoHub> {
         tooltip: "New List",
         child: Icon(Icons.add),
         onPressed: () async {
-          final result = await Navigator.push(
+          final newList = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ToDoList(listName: 'New List'),
+              builder: (context) => ToDoList(listName: null),
             ),
           );
           // when we come back from the new list page, a list tile for that new list (using the list data returned by the page)will be added unless the user didnt create any list
-          if (result != null && result is ToDoListModel) {
+          if (newList != null && newList is ToDoListModel) {
             setState(() {
-              todoLists.add(result);
+              todoLists.add(newList);
             });
           }
         },

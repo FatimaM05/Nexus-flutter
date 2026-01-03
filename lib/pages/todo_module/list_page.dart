@@ -5,9 +5,10 @@ import '../../widgets/todo_module/completion_status.dart';
 import '../todo_module/task_detail.dart';
 
 class ToDoList extends StatefulWidget {
-  final String listName;
+  String? listName;
+  bool isDefault;
 
-  const ToDoList({super.key, required this.listName});
+  ToDoList({super.key, required this.listName, this.isDefault = false});
 
   @override
   State<ToDoList> createState() => _ToDoListState();
@@ -30,12 +31,49 @@ class _ToDoListState extends State<ToDoList> {
   List<ToDoTaskModel> completedTasks = [];
   List<ToDoTaskModel> pendingTasks = [];
 
-  //method to get the tasks of this list from the database
+  bool isEditing = false;
+  late TextEditingController _textController;
+  late FocusNode _focusNode;
 
   @override
   void initState() {
     super.initState();
+    _textController = TextEditingController(
+      text: widget.listName == null ? "" : widget.listName,
+    );
+    _focusNode = FocusNode();
     filterTasks();
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _startEditing() {
+    setState(() {
+      isEditing = true;
+    });
+    _focusNode.requestFocus();
+  }
+
+  void _cancelEditing() {
+    setState(() {
+      isEditing = false;
+      _textController.text = widget.listName == null ? '' : widget.listName!;
+    });
+    _focusNode.unfocus();
+  }
+
+  void _updateListName() {
+    setState(() {
+      isEditing = false;
+      widget.listName = _textController.text;
+      //Update the task in the db
+    });
+    _focusNode.unfocus();
   }
 
   void filterTasks() {
@@ -56,17 +94,52 @@ class _ToDoListState extends State<ToDoList> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          widget.listName == 'New List' ? "New List" : "To Do List",
-          style: TextStyle(color: Colors.white),
-        ),
-        actions: widget.listName == 'New List' ? [Icon(Icons.done)] : null,
-        actionsPadding: widget.listName == 'New List'
-            ? EdgeInsets.only(right: 20.0)
-            : EdgeInsets.zero,
+        title: widget.isDefault
+            ? Text(
+                '${widget.listName}',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 22.0,
+                ),
+              )
+            : isEditing
+            ? TextField(
+                controller: _textController,
+                focusNode: _focusNode,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w500,
+                  fontSize: 22.0,
+                ),
+                decoration: InputDecoration(border: InputBorder.none),
+                onSubmitted: (value) => _updateListName(),
+              )
+            : GestureDetector(
+                onDoubleTap: _startEditing,
+                child: Text(
+                  _textController.text.isEmpty
+                      ? "New List"
+                      : _textController.text,
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w500,
+                    fontSize: 22.0,
+                  ),
+                ),
+              ),
+        actions: widget.isDefault ? [] : isEditing
+            ? [
+                IconButton(
+                  icon: Icon(Icons.close, color: Colors.white),
+                  onPressed: _cancelEditing,
+                ),
+              ]
+            : [IconButton(icon: Icon(Icons.delete_outline), onPressed: () {})],
+        actionsPadding: EdgeInsets.only(right: 20.0),
       ),
       body: SafeArea(
-        child: widget.listName == 'New List'
+        child: widget.listName == null
             ? Container(
                 padding: EdgeInsets.all(15.0),
                 width: double.infinity,
@@ -133,10 +206,7 @@ class _ToDoListState extends State<ToDoList> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  TaskDetail(task: null),
-            ),
+            MaterialPageRoute(builder: (context) => TaskDetail(task: null)),
           );
         },
       ),
