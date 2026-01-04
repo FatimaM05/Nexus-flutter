@@ -7,6 +7,7 @@ import '../../models/todo_task_model.dart';
 import '../../widgets/todo_module/task_tile.dart';
 import '../../services/todo_list_services.dart';
 import 'dart:async';
+import '../../services/myDay_reset_service.dart';
 
 class ToDoHub extends StatefulWidget {
   const ToDoHub({super.key});
@@ -23,11 +24,22 @@ class _ToDoHubState extends State<ToDoHub> {
   StreamSubscription<List<ToDoListModel>>? _listsSubscription;
 
   List<ToDoTaskModel> filteredTasks = [];
+  StreamSubscription<List<ToDoTaskModel>>? _searchSubscription;
+  final MyDayResetService _resetService = MyDayResetService();
 
   @override
   void initState() {
     super.initState();
     _loadLists();
+    _checkMyDayReset();
+  }
+
+  Future<void> _checkMyDayReset() async {
+    try {
+      await _resetService.checkAndResetIfNeeded();
+    } catch (e) {
+      print('Error checking My Day reset: $e');
+    }
   }
 
   @override
@@ -69,6 +81,39 @@ class _ToDoHubState extends State<ToDoHub> {
     }
   }
 
+  void _performSearch(String query) {
+    setState(() {
+      searchQuery = query;
+    });
+
+    // Cancel previous search subscription
+    _searchSubscription?.cancel();
+
+    if (query.trim().isEmpty) {
+      setState(() {
+        filteredTasks = [];
+      });
+      return;
+    }
+
+    // Start listening to search results
+    _searchSubscription = _listService
+        .searchTasks(query)
+        .listen(
+          (tasks) {
+            setState(() {
+              filteredTasks = tasks;
+            });
+          },
+          onError: (error) {
+            print('Error searching tasks: $error');
+            setState(() {
+              filteredTasks = [];
+            });
+          },
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -102,11 +147,7 @@ class _ToDoHubState extends State<ToDoHub> {
                         ),
                       ),
                       child: CustomSearchBar(
-                        onSearch: (value) {
-                          setState(() {
-                            searchQuery = value;
-                          });
-                        },
+                        onSearch: _performSearch,
                         hint: 'Search Tasks',
                       ),
                     ),
@@ -124,6 +165,16 @@ class _ToDoHubState extends State<ToDoHub> {
                             ? _buildListsView()
                             : _buildSearchResults(),
                       ),
+                    ),
+                    // JUST FOR TESTING THE MY DAY FUNCTIONALITYYY
+                    ElevatedButton(
+                      onPressed: () async {
+                        await _resetService.resetMyDay();
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('My Day reset manually')),
+                        );
+                      },
+                      child: Text('Reset My Day (Test)'),
                     ),
                   ],
                 ),
@@ -236,14 +287,17 @@ class _ToDoHubState extends State<ToDoHub> {
       // Show loading indicator
       showDialog(
         context: context,
-        barrierDismissible: false,  // this means the user can't dismiss the dialog box showing the indicator
+        barrierDismissible:
+            false, // this means the user can't dismiss the dialog box showing the indicator
         builder: (BuildContext context) {
           return Center(child: CircularProgressIndicator());
         },
       );
 
       // calling the firestore function
-      final ToDoListModel newList = await _listService.createNewList(listName.trim());
+      final ToDoListModel newList = await _listService.createNewList(
+        listName.trim(),
+      );
 
       print('List created with ID: ${newList.id}');
 
@@ -255,10 +309,7 @@ class _ToDoHubState extends State<ToDoHub> {
 
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) =>
-              ToDoListPage(list: newList),
-        ),
+        MaterialPageRoute(builder: (context) => ToDoListPage(list: newList)),
       );
     } catch (e) {
       print('Error creating list: $e');
@@ -318,6 +369,25 @@ class _ToDoHubState extends State<ToDoHub> {
   }
 
   Widget _buildSearchResults() {
+    if (filteredTasks.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.search_off, size: 64, color: Color(0xFFCCCCCC)),
+            SizedBox(height: 16),
+            Text(
+              'No tasks found',
+              style: TextStyle(
+                fontSize: 18,
+                color: Color(0xFF999999),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
       child: ListView.separated(
@@ -325,7 +395,10 @@ class _ToDoHubState extends State<ToDoHub> {
         itemCount: filteredTasks.length,
         separatorBuilder: (context, index) => SizedBox(height: 8),
         itemBuilder: (context, index) {
-          return TaskTile(task: filteredTasks[index], listId: '');
+          return TaskTile(
+            task: filteredTasks[index],
+            listId: filteredTasks[index].listId,
+          );
         },
       ),
     );

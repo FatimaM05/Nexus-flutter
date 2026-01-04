@@ -333,4 +333,41 @@ class ToDoListService {
       rethrow;
     }
   }
+
+  /// Searches for tasks across all lists based on query
+  Stream<List<ToDoTaskModel>> searchTasks(String query) {
+    final currentUser = _auth.currentUser;
+    if (currentUser == null) {
+      throw Exception('No user logged in');
+    }
+
+    final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+
+    if (query.trim().isEmpty) {
+      return Stream.value([]);
+    }
+
+    return _firestore
+        .collection('toDoTasks')
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) {
+          List<ToDoTaskModel> matchingTasks = [];
+          final searchQuery = query.toLowerCase();
+
+          for (var doc in snapshot.docs) {
+            final data = doc.data();
+            final taskName = (data['taskName'] ?? '').toString().toLowerCase();
+
+            // Check if task name contains the search query
+            if (taskName.contains(searchQuery)) {
+              matchingTasks.add(ToDoTaskModel.fromFirestore(data, doc.id));
+            }
+          }
+
+          return matchingTasks;
+        });
+  }
+
+  // ...existing code...
 }
