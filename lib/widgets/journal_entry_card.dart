@@ -4,11 +4,13 @@ import 'package:nexus/models/journal_entry.dart';
 class JournalEntryCard extends StatelessWidget {
   final JournalEntry entry;
   final VoidCallback onTap;
+  final VoidCallback? onDelete;
 
   const JournalEntryCard({
     super.key,
     required this.entry,
     required this.onTap,
+    this.onDelete,
   });
 
   @override
@@ -48,12 +50,29 @@ class JournalEntryCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  Text(
-                    _formatDate(entry.date),
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color.fromRGBO(153, 161, 175, 1),
-                    ),
+                  Row(
+                    children: [
+                      Text(
+                        _formatDate(entry.date),
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: Color.fromRGBO(153, 161, 175, 1),
+                        ),
+                      ),
+                      if (onDelete != null) ...[
+                        const SizedBox(width: 8),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            size: 20,
+                            color: Color.fromRGBO(153, 161, 175, 1),
+                          ),
+                          onPressed: onDelete,
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),

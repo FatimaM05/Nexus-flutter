@@ -107,6 +107,7 @@ class _NewEntryPageState extends State<NewEntryPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+
               Text(
                 DateFormat('MM/dd/yyyy').format(_selectedDate),
                 style: const TextStyle(

@@ -94,6 +94,17 @@ class _JournalListPageState extends State<JournalListPage> {
     );
   }
 
+  void _deleteEntry(JournalEntry entry) {
+    setState(() {
+      _entries.remove(entry);
+      _filteredEntries = _entries.where((e) {
+        if (_searchQuery.isEmpty) return true;
+        return e.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+            e.content.toLowerCase().contains(_searchQuery.toLowerCase());
+      }).toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -163,6 +174,7 @@ class _JournalListPageState extends State<JournalListPage> {
                         return JournalEntryCard(
                           entry: entry,
                           onTap: () => _viewEntryDetail(entry),
+                          onDelete: () => _deleteEntry(entry),
                         );
                       },
                     ),
