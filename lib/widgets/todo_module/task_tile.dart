@@ -1,10 +1,37 @@
 import 'package:flutter/material.dart';
 import '../../models/todo_task_model.dart';
 import '../../pages/todo_module/task_detail.dart';
+import '../../services/todo_tasks_services.dart';
 
-class TaskTile extends StatelessWidget {
+class TaskTile extends StatefulWidget {
   final ToDoTaskModel task;
-  const TaskTile({super.key, required this.task});
+  final String listId;
+  
+  const TaskTile({super.key, required this.task, required this.listId});
+
+  @override
+  State<TaskTile> createState() => _TaskTileState();
+}
+
+class _TaskTileState extends State<TaskTile> {
+  final ToDoTaskService _taskService = ToDoTaskService();
+
+  void _toggleTaskCompletion() async {
+    try {
+      // Toggle completion status
+      final newStatus = widget.task.completionStatus == 0 ? 1 : 0;
+
+      // Update in database
+      await _taskService.updateTaskStatus(widget.task.id, newStatus);
+    } catch (e) {
+      print('Error toggling task completion: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update task status')),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,59 +41,53 @@ class TaskTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(
-              alpha: 0.08,
-              red: 0,
-              green: 0,
-              blue: 0,
-            ),
-            blurRadius: 8,
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 4,
             offset: Offset(0, 2),
           ),
         ],
       ),
       child: ListTile(
-        contentPadding: EdgeInsets.symmetric(horizontal: 2.0, vertical: 0.0), //til'es internal padding; horizontal apdding will control space between the leading and border, and trailing and border
-        horizontalTitleGap: 0,  //gap between the titles and the leading/trailing widgets. 
         leading: IconButton(
-          icon: task.completionStatus == 0
-              ? Icon(Icons.radio_button_unchecked, color: Color(0xFFA09CB0))
-              : Icon(Icons.check_circle, color: Color(0xFF99A1AF)),
-          tooltip: 'Mark as complete',
-          onPressed: () {},
-        ),
-        title: GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => TaskDetail(task: task)),
-            );
-          },
-          child: Text(
-            task.name,
-            textAlign: TextAlign.left,
-            style: task.completionStatus == 1
-                ? TextStyle(
-                    color: Color(0xFF999999),
-                    decoration: TextDecoration.lineThrough,
-                    decorationColor: Color(0xFF999999),
-                  )
-                : TextStyle(
-                    color: Color(0xFF333333),
-                    decoration: TextDecoration.none,
-                  ),
-          ),
-        ),
-        trailing: IconButton(
           icon: Icon(
-            Icons.delete_outline,
-            color: task.completionStatus == 1
+            widget.task.completionStatus == 1
+                ? Icons.check_circle
+                : Icons.radio_button_unchecked,
+            color: widget.task.completionStatus == 1
                 ? Color(0x96999999)
-                : Color(0xFF99A1AF),
+                : Color(0xFFA09CB0),
+            size: 27.0,
           ),
-          tooltip: 'Delete Task',
-          onPressed: () {},
+          onPressed: _toggleTaskCompletion,
         ),
+        title: Text(
+          widget.task.name,
+          style: TextStyle(
+            fontSize: 16.0,
+            fontWeight: FontWeight.w400,
+            color: widget.task.completionStatus == 1
+                ? Color(0xFF999999)
+                : Color(0xFF333333),
+            decoration: widget.task.completionStatus == 1
+                ? TextDecoration.lineThrough
+                : TextDecoration.none,
+          ),
+        ),
+        trailing: Icon(
+          Icons.chevron_right,
+          color: Color(0xFF99A1AF),
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TaskDetail(
+                task: widget.task,
+                listId: widget.listId,
+              ),
+            ),
+          );
+        },
       ),
     );
   }

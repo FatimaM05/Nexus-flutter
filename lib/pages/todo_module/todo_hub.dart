@@ -3,6 +3,10 @@ import "../../widgets/todo_module/list_tile.dart";
 import "./list_page.dart";
 import "../../widgets/custom_search_bar.dart";
 import '../../models/todo_list_model.dart';
+import '../../models/todo_task_model.dart';
+import '../../widgets/todo_module/task_tile.dart';
+import '../../services/todo_list_services.dart';
+import 'dart:async';
 
 class ToDoHub extends StatefulWidget {
   const ToDoHub({super.key});
@@ -13,36 +17,57 @@ class ToDoHub extends StatefulWidget {
 
 class _ToDoHubState extends State<ToDoHub> {
   String searchQuery = '';
-  //THE LISTSSSSSS
   List<ToDoListModel> todoLists = [];
-  // SEARCH RESULTSSSSS
-  List<String> filteredTasks = [];
+  final ToDoListService _listService = ToDoListService();
+  bool isLoading = true;
+  StreamSubscription<List<ToDoListModel>>? _listsSubscription;
+
+  List<ToDoTaskModel> filteredTasks = [];
 
   @override
   void initState() {
     super.initState();
-    //temporary dummy data for lists to be displayed
-    setState(() {
-      todoLists = [
-        ToDoListModel(id: 1, numberOfTasks: 4, name: 'My Day'),
-        ToDoListModel(id: 2, numberOfTasks: 2, name: 'Important Tasks'),
-        ToDoListModel(id: 3, numberOfTasks: 3, name: 'All Tasks'),
-        ToDoListModel(id: 4, numberOfTasks: 0, name: 'Work'),
-        ToDoListModel(id: 5, numberOfTasks: 1, name: 'Personal'),
-        ToDoListModel(id: 6, numberOfTasks: 0, name: 'Work'),
-        ToDoListModel(id: 7, numberOfTasks: 1, name: 'Personal'),
-        ToDoListModel(id: 6, numberOfTasks: 0, name: 'Work'),
-        ToDoListModel(id: 7, numberOfTasks: 1, name: 'Personal'),
-        ToDoListModel(id: 6, numberOfTasks: 0, name: 'Work'),
-        ToDoListModel(id: 7, numberOfTasks: 1, name: 'Personal'),
-      ];
-    });
-    //call method for fetching list data
+    _loadLists();
   }
 
-  //function to get the lists' data from firebase and send to model ToDoListModel
+  @override
+  void dispose() {
+    _listsSubscription?.cancel();
+    super.dispose();
+  }
 
-  //WRITE FILTER TASK FUNCTION HEREEEE (the one that will filter the tasks to show search results)
+  Future<void> _loadLists() async {
+    try {
+      setState(() {
+        isLoading = true;
+      });
+
+      _listsSubscription = _listService.listenToLists().listen(
+        (lists) {
+          setState(() {
+            todoLists = lists;
+            isLoading = false;
+          });
+        },
+        onError: (error) {
+          print('Error listening to lists: $error');
+          setState(() {
+            isLoading = false;
+          });
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Failed to load lists')));
+          }
+        },
+      );
+    } catch (e) {
+      print('Error loading lists: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -206,32 +231,65 @@ class _ToDoHubState extends State<ToDoHub> {
     );
   }
 
-  void _createNewList(BuildContext context, String listName) {
-    // call Firebase function here to cretae a new list
-    // then call the firebase function to get the list and add it to the todoLists list
-    setState(() {
-      todoLists.add(
-        ToDoListModel(
-          id: todoLists.length + 1,
-          numberOfTasks: 0,
-          name: listName,
+  Future<void> _createNewList(BuildContext context, String listName) async {
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,  // this means the user can't dismiss the dialog box showing the indicator
+        builder: (BuildContext context) {
+          return Center(child: CircularProgressIndicator());
+        },
+      );
+
+      // calling the firestore function
+      final ToDoListModel newList = await _listService.createNewList(listName.trim());
+
+      print('List created with ID: ${newList.id}');
+
+      // Close loading dialog
+      Navigator.pop(context);
+
+      // Close the create list dialog
+      Navigator.pop(context);
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) =>
+              ToDoListPage(list: newList),
         ),
       );
-    });
+    } catch (e) {
+      print('Error creating list: $e');
 
-    Navigator.pop(context); // Close dialog
+      // Close loading dialog if it's open
+      Navigator.pop(context);
 
-    // Navigate to the new list page
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) =>
-            ToDoListPage(listName: listName, isDefault: false),
-      ),
-    );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to create list. Please try again.'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildListsView() {
+    if (isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+
+    if (todoLists.isEmpty) {
+      return Center(
+        child: Text(
+          'No lists found. Create one using the + button.',
+          style: TextStyle(fontSize: 16, color: Color(0xFF999999)),
+        ),
+      );
+    }
     return ScrollConfiguration(
       behavior: ScrollConfiguration.of(
         context,
@@ -245,8 +303,7 @@ class _ToDoHubState extends State<ToDoHub> {
         ), //this will add the sizedbox between the list items to add gap
         itemBuilder: (context, index) {
           return SingleListTile(
-            title: todoLists[index].name,
-            numberOfTasks: todoLists[index].numberOfTasks.toString(),
+            list: todoLists[index],
             icon: todoLists[index].name == 'My Day'
                 ? Icons.light_mode_outlined
                 : todoLists[index].name == 'Important Tasks'
@@ -261,6 +318,16 @@ class _ToDoHubState extends State<ToDoHub> {
   }
 
   Widget _buildSearchResults() {
-    return Text('SEARCH RESULTSSSS');
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+      child: ListView.separated(
+        padding: EdgeInsets.only(top: 8.0, right: 8.0, left: 8.0),
+        itemCount: filteredTasks.length,
+        separatorBuilder: (context, index) => SizedBox(height: 8),
+        itemBuilder: (context, index) {
+          return TaskTile(task: filteredTasks[index], listId: '');
+        },
+      ),
+    );
   }
 }
