@@ -82,43 +82,6 @@ class JournalDetailPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              // Tags
-              if (entry.tags.isNotEmpty) ...[
-                const Divider(),
-                const SizedBox(height: 16),
-                const Text(
-                  'Tags',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Color.fromRGBO(51, 51, 51, 1),
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8.0,
-                  runSpacing: 6.0,
-                  children: entry.tags.map((tag) {
-                    return Chip(
-                      label: Text(
-                        tag,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          color: Color.fromRGBO(102, 102, 102, 1),
-                        ),
-                      ),
-                      backgroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8.0),
-                        side: const BorderSide(
-                          color: Color.fromRGBO(200, 200, 200, 1),
-                          width: 1.0,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ],
             ],
           ),
         ),
