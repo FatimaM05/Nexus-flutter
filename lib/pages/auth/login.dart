@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import "../auth/signup.dart";
 import '../home_screen.dart'; 
 
@@ -16,6 +17,47 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
 
   bool _obscurePassword = true;
+
+  Future<void> signInWithGoogle() async {
+    try {
+      // Trigger the authentication flow
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        // The user canceled the sign-in
+        return;
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase with Google credential
+      UserCredential userCredential =
+          await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Save login state
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isLoggedIn', true);
+
+      String username = userCredential.user?.displayName ?? "User";
+      await prefs.setString('username', username);
+
+      // Navigate to home
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => HomePage(username: username)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     decoration: InputDecoration(
                       hintText: 'Password',
-                      hintStyle: const TextStyle(color: Colors.blueGrey),
+                      hintStyle: const TextStyle(color: Colors.grey),
                       contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(30)),
                       suffixIcon: IconButton(
@@ -190,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 60,
                     child: OutlinedButton.icon(
                       onPressed: (){
-                          // gotta add logic here ughhh
+                          signInWithGoogle();
                       },
                       icon: Image.asset(
                         'assets/images/google.png',
@@ -222,7 +264,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: const Text(
                           "Register",
                           style: TextStyle(
-                            color: Color.fromRGBO(63, 49, 116, 100),
+                            color: Colors.deepPurple,
                             fontWeight: FontWeight.bold,
                             decoration: TextDecoration.underline,
                           ),

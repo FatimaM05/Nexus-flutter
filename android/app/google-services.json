@@ -12,7 +12,20 @@
           "package_name": "com.example.nexus"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "204384261168-smrvch2hunrk5djeqcj3ns0suhduqd83.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nexus",
+            "certificate_hash": "411a84320bcb5ae455ed301a19910f8c48d5a5e1"
+          }
+        },
+        {
+          "client_id": "204384261168-2iebhscqk7nnb9ae0jm5hs4vmk5ni5an.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDL6YgZ1kLBiGbX73vvXnBctOD0Dk29cvE"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "204384261168-2iebhscqk7nnb9ae0jm5hs4vmk5ni5an.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "204384261168-5e5umjoc8go43q2o1lc6osfup4ec5rfl.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nexus"
+              }
+            }
+          ]
         }
       }
     }
