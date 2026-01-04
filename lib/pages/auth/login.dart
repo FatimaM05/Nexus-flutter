@@ -150,6 +150,63 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: const Text('Login', style: TextStyle(fontSize: 20, color: Colors.white)),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SizedBox(
+                          width: 100,
+                          child: Divider(
+                            thickness: 1,
+                            color: Colors.grey.shade300,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                          child: Text(
+                            'OR',
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontWeight: FontWeight.w400,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ),
+                        SizedBox(
+                          width: 100,
+                          child: Divider(
+                            thickness: 1,
+                            color: Colors.grey.shade300,
+                            
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Google signin thingy
+                  SizedBox(
+                    width: double.infinity,
+                    height: 60,
+                    child: OutlinedButton.icon(
+                      onPressed: (){
+                          // gotta add logic here ughhh
+                      },
+                      icon: Image.asset(
+                        'assets/images/google.png',
+                        height: 24,
+                      ),
+                      label: const Text(
+                        'Continue with Google',
+                        style: TextStyle(fontSize: 18, color: Colors.black),
+                      ),
+                      style: OutlinedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 40),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,

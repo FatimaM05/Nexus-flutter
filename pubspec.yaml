@@ -60,6 +60,7 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/Logo.png
+    - assets/images/google.png
   fonts:
       - family: Chicle
         fonts:
