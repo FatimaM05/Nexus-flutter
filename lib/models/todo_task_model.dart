@@ -6,7 +6,6 @@ class ToDoTaskModel {
   String listId;
   bool isImportant;
   bool isMyDay;
-  bool repeat;
 
   ToDoTaskModel({
     required this.id,
@@ -16,7 +15,6 @@ class ToDoTaskModel {
     this.isImportant = false,
     this.isMyDay = false,
     this.notes,
-    this.repeat = false,
   });
 
   // Convert Firestore document to ToDoTaskModel
@@ -29,7 +27,6 @@ class ToDoTaskModel {
       listId: data['listId'],
       isImportant: data['isImportant'] ?? false,
       isMyDay: data['isMyDay'] ?? false,
-      repeat: data['repeat'] ?? false,
     );
   }
 }

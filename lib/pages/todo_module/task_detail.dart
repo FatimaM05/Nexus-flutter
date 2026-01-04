@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../models/todo_task_model.dart';
-import '../../widgets/todo_module/task_actions.dart';
 import '../../services/todo_tasks_services.dart';
 
 class TaskDetail extends StatefulWidget {
@@ -14,12 +13,6 @@ class TaskDetail extends StatefulWidget {
 }
 
 class _TaskDetailState extends State<TaskDetail> {
-  final List<String> actions = [
-    'Mark as Important',
-    'Add to My Day',
-    'Repeat',
-    'Move to List',
-  ];
   bool isEditingTaskName = false;
   bool isEditingNotes = false;
   bool _isSaving = false;
@@ -247,6 +240,246 @@ class _TaskDetailState extends State<TaskDetail> {
     }
   }
 
+  void _deleteTask() async {
+    if (widget.task == null) return;
+
+    try {
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(child: CircularProgressIndicator());
+        },
+      );
+
+      // Delete the task from Firestore (all instances)
+      await _taskService.deleteTask(widget.task!.id);
+
+      // Close loading dialog
+      if (mounted) {
+        Navigator.pop(context);
+      }
+
+      // Go back to the list page
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      print('Error deleting task: $e');
+
+      // Close loading dialog if open
+      if (mounted) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
+  void _toggleImportantStatus() async {
+    if (widget.task == null) return;
+
+    try {
+      // Toggle important status
+      final newImportantStatus = !widget.task!.isImportant;
+
+      await _taskService.updateTaskImportantStatus(
+        widget.task!.id,
+        newImportantStatus,
+      );
+
+      // Update local state
+      setState(() {
+        widget.task!.isImportant = newImportantStatus;
+      });
+    } catch (e) {
+      print('Error toggling important status: $e');
+    }
+  }
+
+  void _toggleMyDayStatus() async {
+    if (widget.task == null) return;
+
+    try {
+      // Toggle My Day status
+      final newMyDayStatus = !widget.task!.isMyDay;
+
+      // Update in database
+      await _taskService.updateTaskMyDayStatus(widget.task!.id, newMyDayStatus);
+
+      // Update local state
+      setState(() {
+        widget.task!.isMyDay = newMyDayStatus;
+      });
+    } catch (e) {
+      print('Error toggling My Day status: $e');
+    }
+  }
+
+  void _showMoveToListDialog() {
+    if (widget.task == null) return;
+
+    final TextEditingController listNameController = TextEditingController();
+    final FocusNode focusNode = FocusNode();
+    String errorMessage = '';
+
+    // Auto-focus the text field
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      focusNode.requestFocus();
+    });
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                side: BorderSide(
+                  color: Color.fromARGB(255, 148, 140, 179),
+                  width: 3.0,
+                ),
+                borderRadius: BorderRadius.circular(20.0),
+              ),
+              title: Text(
+                'Move to List',
+                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 20),
+              ),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: listNameController,
+                    focusNode: focusNode,
+                    autofocus: true,
+                    decoration: InputDecoration(
+                      hintText: 'Enter list name',
+                      hintStyle: TextStyle(color: Color(0xFFA09CB0)),
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFF999999)),
+                      ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Color(0xFFA09CB0), width: 1),
+                      ),
+                      errorText: errorMessage.isEmpty ? null : errorMessage,
+                    ),
+                    onChanged: (value) {
+                      setDialogState(() {
+                        errorMessage = ''; // Clear error on typing
+                      });
+                    },
+                    onSubmitted: (value) async {
+                      if (value.trim().isNotEmpty) {
+                        await _moveToList(
+                          context,
+                          value,
+                          setDialogState,
+                          listNameController,
+                          (error) {
+                            setDialogState(() {
+                              errorMessage = error;
+                            });
+                          },
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    focusNode.dispose();
+                    listNameController.dispose();
+                    Navigator.pop(context);
+                  },
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(color: Color(0xFF666666)),
+                  ),
+                ),
+                TextButton(
+                  onPressed: listNameController.text.trim().isEmpty
+                      ? null
+                      : () async {
+                          await _moveToList(
+                            context,
+                            listNameController.text,
+                            setDialogState,
+                            listNameController,
+                            (error) {
+                              setDialogState(() {
+                                errorMessage = error;
+                              });
+                            },
+                          );
+                        },
+                  child: Text(
+                    'Move to List',
+                    style: TextStyle(
+                      color: listNameController.text.trim().isEmpty
+                          ? Color.fromARGB(255, 189, 188, 188)
+                          : Color(0xFF666666),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> _moveToList(
+    BuildContext context,
+    String listName,
+    StateSetter setDialogState,
+    TextEditingController controller,
+    Function(String) setError,
+  ) async {
+    try {
+      // Check if list exists
+      final listId = await _taskService.getListIdByName(listName.trim());
+
+      if (listId == null) {
+        // List doesn't exist - show error
+        setError('List "$listName" does not exist');
+        controller.clear();
+        return;
+      }
+
+      // Show loading indicator
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Center(child: CircularProgressIndicator());
+        },
+      );
+
+      // Move the task
+      await _taskService.moveTaskToList(widget.task!.id, listId);
+
+      // Close loading dialog
+      Navigator.pop(context);
+
+      // Close the move to list dialog
+      Navigator.pop(context);
+
+      // Go back to todo hub (or previous page)
+      Navigator.pop(context);
+    } catch (e) {
+      print('Error moving task: $e');
+
+      // Close loading dialog if it's open
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -256,9 +489,7 @@ class _TaskDetailState extends State<TaskDetail> {
           if (widget.task != null)
             IconButton(
               icon: Icon(Icons.delete_outline, color: Colors.white, size: 27.0),
-              onPressed: () {
-                // TODO: Delete task
-              },
+              onPressed: _deleteTask,
             ),
           if (widget.task == null && !_isSaving)
             IconButton(
@@ -357,8 +588,49 @@ class _TaskDetailState extends State<TaskDetail> {
                 endIndent: 8.0,
                 thickness: 1.0,
               ),
-              ...actions.map((action) => TaskActions(actionName: action)),
-              //If you just put the .map() inside a Column, you would have an iterable inside a list, which would cause an error. The ... "unpacks" your newly created list so that each widget sits individually inside the parent.
+              ListTile(
+                leading: Icon(
+                  widget.task?.isImportant == true
+                      ? Icons.star
+                      : Icons.star_outline,
+                  color: Color(0xFF99A1AF),
+                  size: 27.0,
+                ),
+                title: Text(
+                  widget.task?.isImportant == true
+                      ? 'Remove from Important'
+                      : 'Mark as Important',
+                ),
+                contentPadding: EdgeInsets.only(left: 30, top: 4, bottom: 4),
+                onTap: widget.task == null ? null : _toggleImportantStatus,
+              ),
+              // Add to My Day
+              ListTile(
+                leading: Icon(
+                  widget.task?.isMyDay == true
+                      ? Icons.wb_sunny
+                      : Icons.light_mode_outlined,
+                  color: Color(0xFF99A1AF),
+                  size: 27.0,
+                ),
+                title: Text(
+                  widget.task?.isMyDay == true
+                      ? 'Remove from My Day'
+                      : 'Add to My Day',
+                ),
+                contentPadding: EdgeInsets.only(left: 30, top: 4, bottom: 4),
+                onTap: widget.task == null ? null : _toggleMyDayStatus,
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.summarize_outlined,
+                  color: Color(0xFF99A1AF),
+                  size: 27.0,
+                ),
+                title: Text('Move to List'),
+                contentPadding: EdgeInsets.only(left: 30, top: 4, bottom: 4),
+                onTap: widget.task == null ? null : _showMoveToListDialog,
+              ),
               Divider(
                 color: Color(0xFFF3F4F6),
                 indent: 8.0,

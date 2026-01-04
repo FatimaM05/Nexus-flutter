@@ -154,10 +154,7 @@ class ToDoListService {
       for (var listData in defaultLists) {
         await _firestore.collection('toDoLists').add(listData);
       }
-
-      print('Default lists created successfully for userId: $userId');
     } catch (e) {
-      print('Error creating default lists: $e');
       rethrow;
     }
   }
@@ -189,8 +186,6 @@ class ToDoListService {
       //final userId = currentUser.uid;
       final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
-      print('Creating new list: $listName for userId: $userId');
-
       final docRef = await _firestore.collection('toDoLists').add({
         'userId': userId,
         'listName': listName,
@@ -207,7 +202,6 @@ class ToDoListService {
         isDefault: false,
       );
 
-      print('List created successfully with ID: ${docRef.id}');
       return newList; // Return the new ToDoListModel instance
     } catch (e) {
       print('Error creating new list: $e');
@@ -225,16 +219,12 @@ class ToDoListService {
     //final userId = currentUser.uid;
     final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
-    print('Setting up task listener for listId: $listId, userId: $userId');
-
     return _firestore
         .collection('toDoTasks')
         .where('userId', isEqualTo: userId)
         .where('listId', isEqualTo: listId)
         .snapshots()
         .map((snapshot) {
-          print('Task snapshot received: ${snapshot.docs.length} tasks');
-
           if (snapshot.docs.isEmpty) {
             print('WARNING: No tasks found for listId: $listId');
           }
@@ -242,9 +232,6 @@ class ToDoListService {
 
           for (var doc in snapshot.docs) {
             final data = doc.data();
-            print(
-              'Task: ${data['taskName']}, status: ${data['completionStatus']}',
-            );
 
             allTasks.add(ToDoTaskModel.fromFirestore(data, doc.id));
           }
@@ -253,18 +240,13 @@ class ToDoListService {
         });
   }
 
-
   //updating list name
   Future<void> updateListName(String listId, String newListName) async {
     try {
-      print('Updating list $listId with new name: $newListName');
-
       await _firestore.collection('toDoLists').doc(listId).update({
         'listName': newListName,
         'updatedAt': FieldValue.serverTimestamp(),
       });
-
-      print('List name updated successfully');
     } catch (e) {
       print('Error updating list name: $e');
       rethrow;
@@ -281,25 +263,73 @@ class ToDoListService {
 
       final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
-      // First, delete all tasks belonging to this list
+      // Get all tasks belonging to this list
       final tasksSnapshot = await _firestore
           .collection('toDoTasks')
           .where('userId', isEqualTo: userId)
           .where('listId', isEqualTo: listId)
           .get();
 
-      // Delete all tasks in a batch
-      final batch = _firestore.batch();
+      // Collect all task names to find duplicates in other lists
+      Set<String> taskNamesToDelete = {};
       for (var taskDoc in tasksSnapshot.docs) {
+        final taskName = taskDoc.data()['taskName'];
+        if (taskName != null) {
+          taskNamesToDelete.add(taskName);
+        }
+      }
+
+      // Find ALL instances of these tasks across all lists
+      List<DocumentSnapshot> allTaskInstances = [];
+
+      for (var taskName in taskNamesToDelete) {
+        final duplicatesSnapshot = await _firestore
+            .collection('toDoTasks')
+            .where('userId', isEqualTo: userId)
+            .where('taskName', isEqualTo: taskName)
+            .get();
+
+        allTaskInstances.addAll(duplicatesSnapshot.docs);
+      }
+
+      // Group tasks by listId to update task counts
+      Map<String, int> listCountUpdates = {};
+      for (var taskDoc in allTaskInstances) {
+        final data = taskDoc.data() as Map<String, dynamic>?;
+
+        if (data != null) {
+          final taskListId = data['listId'];
+          final completionStatus = data['completionStatus'] ?? 0;
+
+          // Only count incomplete tasks for decrementing
+          if (completionStatus == 0) {
+            listCountUpdates[taskListId] =
+                (listCountUpdates[taskListId] ?? 0) + 1;
+          }
+        }
+      }
+
+      // Delete all task instances in a batch
+      final batch = _firestore.batch();
+      for (var taskDoc in allTaskInstances) {
         batch.delete(taskDoc.reference);
       }
       await batch.commit();
 
-      // Now delete the list itself
-      await _firestore.collection('toDoLists').doc(listId).delete();
+      // Update task counts for affected lists
+      for (var entry in listCountUpdates.entries) {
+        final affectedListId = entry.key;
+        final countToDecrement = entry.value;
 
+        await _firestore.collection('toDoLists').doc(affectedListId).update({
+          'taskCount': FieldValue.increment(-countToDecrement),
+          'updatedAt': FieldValue.serverTimestamp(),
+        });
+      }
+
+      // Finally, delete the list itself
+      await _firestore.collection('toDoLists').doc(listId).delete();
     } catch (e) {
-      print('Error deleting list: $e');
       rethrow;
     }
   }
