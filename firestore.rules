@@ -1,0 +1,9 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow all operations on journal_entries collection
+    match /journal_entries/{document} {
+      allow read, write: if true;
+    }
+  }
+}

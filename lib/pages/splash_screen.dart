@@ -1,7 +1,7 @@
 import 'dart:async';
-import 'dart:math' as math; 
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'home_screen.dart';
 import "./auth/login.dart";
 
@@ -12,7 +12,8 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateMixin {
+class _SplashPageState extends State<SplashPage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
 
   @override
@@ -23,33 +24,31 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
-    )..repeat(); 
+    )..repeat();
 
     // Navigate Home
     Timer(const Duration(seconds: 6), () async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool isLoggedIn = prefs.getBool('isLoggedIn') ?? false; 
-    if (!mounted) return;
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (!mounted) return;
 
-
-    if (isLoggedIn) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomePage()),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => LoginScreen()),
-      );
-    }
-  });
+      if (currentUser != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomePage()),
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => LoginScreen()),
+        );
+      }
+    });
   }
 
   @override
   void dispose() {
     // Dispose controller
-    _controller.dispose(); 
+    _controller.dispose();
     super.dispose();
   }
 
@@ -81,7 +80,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                         fontSize: 60,
                         color: Colors.white,
                         fontWeight: FontWeight.normal,
-                        fontFamily: 'Chicle', 
+                        fontFamily: 'Chicle',
                       ),
                     ),
                   ),
@@ -97,7 +96,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
                 letterSpacing: 2,
                 color: Colors.white,
                 fontWeight: FontWeight.normal,
-                fontFamily: 'Chicle', 
+                fontFamily: 'Chicle',
               ),
             ),
           ],

@@ -1,24 +1,13 @@
 // lib/services/firebase_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:nexus/models/journal_entry.dart';
 
 class FirebaseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Get current user ID
-  String? get currentUserId => _auth.currentUser?.uid;
-
-  // Collection reference
+  // Collection reference - using a general collection without user authentication
   CollectionReference get _journalEntriesCollection {
-    if (currentUserId == null) {
-      throw Exception('User not authenticated');
-    }
-    return _firestore
-        .collection('users')
-        .doc(currentUserId)
-        .collection('journal_entries');
+    return _firestore.collection('journal_entries');
   }
 
   // Add a new journal entry. Returns the document id of the saved entry.
@@ -34,7 +23,6 @@ class FirebaseService {
         return entry.id;
       }
     } catch (e) {
-      print('Error adding entry: $e');
       rethrow;
     }
   }
@@ -44,7 +32,6 @@ class FirebaseService {
     try {
       await _journalEntriesCollection.doc(entry.id).update(entry.toMap());
     } catch (e) {
-      print('Error updating entry: $e');
       rethrow;
     }
   }
@@ -54,7 +41,6 @@ class FirebaseService {
     try {
       await _journalEntriesCollection.doc(entryId).delete();
     } catch (e) {
-      print('Error deleting entry: $e');
       rethrow;
     }
   }
@@ -74,7 +60,6 @@ class FirebaseService {
             }).toList();
           });
     } catch (e) {
-      print('Error getting entries: $e');
       return const Stream.empty();
     }
   }
@@ -92,7 +77,6 @@ class FirebaseService {
             entry.content.toLowerCase().contains(query.toLowerCase());
       }).toList();
     } catch (e) {
-      print('Error searching entries: $e');
       return [];
     }
   }

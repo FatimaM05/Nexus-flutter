@@ -5,14 +5,12 @@ class JournalEntry {
   final String title;
   final String content;
   final DateTime date;
-  final List<String> tags;
 
   JournalEntry({
     required this.id,
     required this.title,
     required this.content,
     required this.date,
-    this.tags = const [],
   });
 
   // Convert to Map (for Firestore)
@@ -22,7 +20,6 @@ class JournalEntry {
       'title': title,
       'content': content,
       'date': Timestamp.fromDate(date),
-      'tags': tags,
     };
   }
 
@@ -48,7 +45,6 @@ class JournalEntry {
       title: map['title'] ?? '',
       content: map['content'] ?? '',
       date: parsedDate,
-      tags: List<String>.from(map['tags'] ?? []),
     );
   }
 
@@ -57,14 +53,12 @@ class JournalEntry {
     String? title,
     String? content,
     DateTime? date,
-    List<String>? tags,
   }) {
     return JournalEntry(
       id: id ?? this.id,
       title: title ?? this.title,
       content: content ?? this.content,
       date: date ?? this.date,
-      tags: tags ?? this.tags,
     );
   }
 }

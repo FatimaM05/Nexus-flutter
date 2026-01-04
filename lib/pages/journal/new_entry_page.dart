@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:nexus/models/journal_entry.dart';
+import 'package:nexus/pages/journal/firebase_service.dart';
 
 class NewEntryPage extends StatefulWidget {
   final JournalEntry? existingEntry;
@@ -14,7 +15,9 @@ class NewEntryPage extends StatefulWidget {
 class _NewEntryPageState extends State<NewEntryPage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
+  final FirebaseService _firebaseService = FirebaseService();
   DateTime _selectedDate = DateTime.now();
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -33,7 +36,7 @@ class _NewEntryPageState extends State<NewEntryPage> {
     super.dispose();
   }
 
-  void _saveEntry() {
+  void _saveEntry() async {
     if (_titleController.text.isEmpty || _contentController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill in title and content')),
@@ -41,17 +44,47 @@ class _NewEntryPageState extends State<NewEntryPage> {
       return;
     }
 
-    final entry = JournalEntry(
-      id:
-          widget.existingEntry?.id ??
-          DateTime.now().millisecondsSinceEpoch.toString(),
-      title: _titleController.text,
-      content: _contentController.text,
-      date: _selectedDate,
-      tags: [],
-    );
+    setState(() {
+      _isLoading = true;
+    });
 
-    Navigator.pop(context, entry);
+    try {
+      final entry = JournalEntry(
+        id: widget.existingEntry?.id ?? '',
+        title: _titleController.text,
+        content: _contentController.text,
+        date: _selectedDate,
+      );
+
+      if (widget.existingEntry == null) {
+        // Create new entry
+        final entryId = await _firebaseService.addJournalEntry(entry);
+        final savedEntry = entry.copyWith(id: entryId);
+        Navigator.pop(context, savedEntry);
+      } else {
+        // Update existing entry
+        await _firebaseService.updateJournalEntry(entry);
+        Navigator.pop(context, entry);
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.existingEntry == null
+                ? 'Entry saved successfully'
+                : 'Entry updated successfully',
+          ),
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Error saving entry: $e')));
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -83,10 +116,25 @@ class _NewEntryPageState extends State<NewEntryPage> {
           ),
         ),
         actions: [
-          TextButton(
-            onPressed: _saveEntry,
-            child: const Text('Save', style: TextStyle(color: Colors.white)),
-          ),
+          _isLoading
+              ? const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                )
+              : TextButton(
+                  onPressed: _saveEntry,
+                  child: const Text(
+                    'Save',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
         ],
       ),
       body: Container(
@@ -107,21 +155,26 @@ class _NewEntryPageState extends State<NewEntryPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              Text(
-                DateFormat('MM/dd/yyyy').format(_selectedDate),
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
+              GestureDetector(
+                onTap: () => _selectDate(context),
+                child: Text(
+                  DateFormat('MM/dd/yyyy').format(_selectedDate),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Color.fromRGBO(
+                      160,
+                      156,
+                      176,
+                      1,
+                    ), // Make it look clickable
+                  ),
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 DateFormat('EEEE, MMMM d, yyyy').format(_selectedDate),
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 14, color: Colors.grey),
               ),
               const SizedBox(height: 24),
 
@@ -130,13 +183,9 @@ class _NewEntryPageState extends State<NewEntryPage> {
                 decoration: const InputDecoration(
                   border: InputBorder.none,
                   hintText: 'Entry Title',
-                  hintStyle: TextStyle(
-                    fontSize: 16,
-                  ),
+                  hintStyle: TextStyle(fontSize: 16),
                 ),
-                style: const TextStyle(
-                  fontSize: 16,
-                ),
+                style: const TextStyle(fontSize: 16),
               ),
               const Divider(height: 20, thickness: 1),
               const SizedBox(height: 16),
@@ -146,13 +195,9 @@ class _NewEntryPageState extends State<NewEntryPage> {
                 decoration: const InputDecoration(
                   border: InputBorder.none,
                   hintText: 'Write your thoughts...',
-                  hintStyle: TextStyle(
-                    fontSize: 16,
-                  ),
+                  hintStyle: TextStyle(fontSize: 16),
                 ),
-                style: const TextStyle(
-                  fontSize: 16,
-                ),
+                style: const TextStyle(fontSize: 16),
                 maxLines: 10,
                 keyboardType: TextInputType.multiline,
               ),

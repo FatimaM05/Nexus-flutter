@@ -90,42 +90,8 @@ class JournalEntryCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               // Divider
-              const Divider(
-                height: 1,
-                color: Color.fromRGBO(240, 240, 240, 1),
-              ),
+              const Divider(height: 1, color: Color.fromRGBO(240, 240, 240, 1)),
               const SizedBox(height: 8),
-              // Tags (if any)
-              if (entry.tags.isNotEmpty) ...[
-                Wrap(
-                  spacing: 6.0,
-                  runSpacing: 4.0,
-                  children: entry.tags.map((tag) {
-                    return Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                        vertical: 4.0,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(6.0),
-                        border: Border.all(
-                          color: const Color.fromRGBO(200, 200, 200, 1),
-                          width: 1.0,
-                        ),
-                      ),
-                      child: Text(
-                        tag,
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Color.fromRGBO(102, 102, 102, 1),
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-                const SizedBox(height: 4),
-              ],
             ],
           ),
         ),
@@ -135,8 +101,18 @@ class JournalEntryCard extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     final months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
     return '${months[date.month - 1]} ${date.day}, ${date.year}';
   }
