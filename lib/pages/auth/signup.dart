@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import './login.dart';
+import '../../services/todo_list_services.dart';
 
 class SignUpScreen extends StatefulWidget {
-  
   const SignUpScreen({super.key});
 
   @override
@@ -12,60 +12,61 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
 
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  final Color primaryPurple = const Color.fromRGBO(160, 156, 176, 100); 
+  final Color primaryPurple = const Color.fromRGBO(160, 156, 176, 100);
   final Color darkText = Colors.grey;
 
   void _handleRegister() async {
-  try {
-    if (_passwordController.text != _confirmPasswordController.text) {
-      throw 'Passwords do not match';
+    try {
+      if (_passwordController.text != _confirmPasswordController.text) {
+        throw 'Passwords do not match';
+      }
+
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(
+            email: _emailController.text.trim(),
+            password: _passwordController.text.trim(),
+          );
+
+      // Save Name of user in firebase
+      String usernameInput = _nameController.text.trim();
+      await userCredential.user?.updateDisplayName(usernameInput);
+      await userCredential.user?.reload();
+
+      // Create default to-do lists for the new user
+      final toDoListService = ToDoListService();
+      await toDoListService.createDefaultLists(userCredential.user!.uid);
+
+      // Save in SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('username', usernameInput);
+      await prefs.setBool('isLoggedIn', true);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Signup Successful!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
+      );
     }
-
-     UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: _emailController.text.trim(),
-      password: _passwordController.text.trim(),
-    );
-
-    // Save Name of user in firebase
-    String usernameInput = _nameController.text.trim();
-    await userCredential.user?.updateDisplayName(usernameInput);
-    await userCredential.user?.reload(); 
-
-    // Save in SharedPreferences
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString('username', usernameInput);
-    await prefs.setBool('isLoggedIn', true);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Signup Successful!'),
-        backgroundColor: Colors.green,
-      ),
-    );
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginScreen()),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(e.toString()),
-        backgroundColor: Colors.red,
-      ),
-    );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -74,25 +75,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Header Container 
-              Container(
+            // Header Container
+            Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 20),
               decoration: const BoxDecoration(
                 color: Color.fromRGBO(160, 156, 176, 100),
-                borderRadius: BorderRadius.vertical(bottom: Radius.circular(40)),
+                borderRadius: BorderRadius.vertical(
+                  bottom: Radius.circular(40),
+                ),
               ),
               child: Column(
                 children: [
-                  Image.asset(
-                    'assets/images/Logo.png', 
-                    height: 100,
-                  ),
+                  Image.asset('assets/images/Logo.png', height: 100),
                   const SizedBox(height: 20),
                   const Text(
                     textAlign: TextAlign.center,
                     'Register your Account',
-                    style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   const Text(
@@ -109,16 +113,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
               child: Column(
                 children: [
-                  _buildTextField(hint: 'Name', controller: _nameController,),
+                  _buildTextField(hint: 'Name', controller: _nameController),
                   const SizedBox(height: 15),
-                  _buildTextField(hint: 'Email', controller: _emailController,),
+                  _buildTextField(hint: 'Email', controller: _emailController),
                   const SizedBox(height: 15),
                   _buildTextField(
                     controller: _passwordController,
                     hint: 'Password',
                     isPassword: true,
                     obscureText: _obscurePassword,
-                    onToggle: () => setState(() => _obscurePassword = !_obscurePassword),
+                    onToggle: () =>
+                        setState(() => _obscurePassword = !_obscurePassword),
                   ),
                   const SizedBox(height: 15),
                   _buildTextField(
@@ -126,10 +131,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     hint: 'Confirm Password',
                     isPassword: true,
                     obscureText: _obscureConfirmPassword,
-                    onToggle: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                    onToggle: () => setState(
+                      () => _obscureConfirmPassword = !_obscureConfirmPassword,
+                    ),
                   ),
                   const SizedBox(height: 40),
-                  
+
                   // Register Button
                   SizedBox(
                     width: double.infinity,
@@ -149,9 +156,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 30),
-                  
+
                   // Footer
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -164,7 +171,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
                         onTap: () {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                            MaterialPageRoute(
+                              builder: (context) => const LoginScreen(),
+                            ),
                           );
                         },
                         child: Text(
@@ -199,20 +208,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
       obscureText: obscureText,
       decoration: InputDecoration(
         hintText: hint,
-        hintStyle: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w400),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 25, vertical: 20),
+        hintStyle: const TextStyle(
+          color: Colors.grey,
+          fontWeight: FontWeight.w400,
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 25,
+          vertical: 20,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
           borderSide: BorderSide(color: primaryPurple),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(30),
-          borderSide: BorderSide(color: const Color.fromARGB(255, 126, 72, 143), width: 2),
+          borderSide: BorderSide(
+            color: const Color.fromARGB(255, 126, 72, 143),
+            width: 2,
+          ),
         ),
         suffixIcon: isPassword
             ? IconButton(
                 icon: Icon(
-                  obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                  obscureText
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
                   color: Colors.grey,
                 ),
                 onPressed: onToggle,
