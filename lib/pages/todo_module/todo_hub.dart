@@ -166,16 +166,6 @@ class _ToDoHubState extends State<ToDoHub> {
                             : _buildSearchResults(),
                       ),
                     ),
-                    // JUST FOR TESTING THE MY DAY FUNCTIONALITYYY
-                    ElevatedButton(
-                      onPressed: () async {
-                        await _resetService.resetMyDay();
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('My Day reset manually')),
-                        );
-                      },
-                      child: Text('Reset My Day (Test)'),
-                    ),
                   ],
                 ),
               ),

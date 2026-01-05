@@ -57,3 +57,5 @@ windows/flutter/generated_plugins.cmake
 linux/flutter/generated_*.*
 windows/flutter/generated_*.*
 macos/flutter/generated_*.*
+config.bat
+node_modules

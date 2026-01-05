@@ -37,7 +37,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _pages = [
-      DashboardScreen(goToTodo: _goToTodo, username: widget.username), 
+      DashboardScreen(goToTodo: _goToTodo, goToJournal: _goToJournal, username: widget.username), 
       ToDoHub(),
       JournalListPage(),
       const Center(child: Text("Highlights Page")),
@@ -46,6 +46,9 @@ class _HomePageState extends State<HomePage> {
 
     void _goToTodo() {
     _onTabSelected(1);
+  }
+  void _goToJournal() {
+    _onTabSelected(2);
   }
 
   void _onTabSelected(int index) {
@@ -76,8 +79,6 @@ class _HomePageState extends State<HomePage> {
         _selectedIndex == 1 ? Icons.check_box : Icons.check_box_outlined;
     final journalIcon =
         _selectedIndex == 2 ? Icons.book : Icons.book_outlined;
-    final highlightsIcon =
-        _selectedIndex == 3 ? Icons.image : Icons.image_outlined;
 
     return Scaffold(
       backgroundColor: const Color(0xFFA09CB0),
@@ -109,7 +110,6 @@ class _HomePageState extends State<HomePage> {
             BottomNavigationBarItem(icon: Icon(dashboardIcon), label: 'Dashboard'),
             BottomNavigationBarItem(icon: Icon(todoIcon), label: 'To-Do'),
             BottomNavigationBarItem(icon: Icon(journalIcon), label: 'Journal'),
-            BottomNavigationBarItem(icon: Icon(highlightsIcon), label: 'Highlights'),
           ],
         ),
       ),

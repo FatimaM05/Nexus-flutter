@@ -14,8 +14,8 @@ class ToDoListService {
       throw Exception('No user logged in');
     }
 
-    //final userId = currentUser.uid;
-    final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+    final userId = currentUser.uid;
+    //final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
     print('Setting up listener for userId: $userId');
 
@@ -183,8 +183,8 @@ class ToDoListService {
         throw Exception('No user logged in');
       }
 
-      //final userId = currentUser.uid;
-      final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+      final userId = currentUser.uid;
+      //final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
       final docRef = await _firestore.collection('toDoLists').add({
         'userId': userId,
@@ -216,8 +216,8 @@ class ToDoListService {
       throw Exception('No user logged in');
     }
 
-    //final userId = currentUser.uid;
-    final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+    final userId = currentUser.uid;
+    //final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
     return _firestore
         .collection('toDoTasks')
@@ -261,7 +261,9 @@ class ToDoListService {
         throw Exception('No user logged in');
       }
 
-      final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+      final userId = currentUser.uid;
+
+      // final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
       // Get all tasks belonging to this list
       final tasksSnapshot = await _firestore
@@ -340,8 +342,9 @@ class ToDoListService {
     if (currentUser == null) {
       throw Exception('No user logged in');
     }
+    final userId = currentUser.uid;
 
-    final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+    // final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
     if (query.trim().isEmpty) {
       return Stream.value([]);

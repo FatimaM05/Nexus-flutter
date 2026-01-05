@@ -21,8 +21,8 @@ class ToDoTaskService {
       if (currentUser == null) {
         throw Exception('No user logged in');
       }
-
-      final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+      final userId = currentUser.uid;
+      //final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
       print('Creating task: $taskName for listId: $listId');
 
@@ -164,7 +164,12 @@ class ToDoTaskService {
 
       // Now find and update ALL instances of this task in other lists
       // (since tasks can exist in multiple lists like "All Tasks", "My Day", etc.)
-      final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('No user logged in');
+      }
+      final userId = currentUser.uid;
+      //final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
       final taskName = taskData['taskName'];
 
       final allInstancesSnapshot = await _firestore
@@ -215,8 +220,8 @@ class ToDoTaskService {
       if (currentUser == null) {
         throw Exception('No user logged in');
       }
-
-      final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+      final userId = currentUser.uid;
+      //final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
       // Get the task to find its name and list
       final taskDoc = await _firestore
@@ -283,8 +288,9 @@ class ToDoTaskService {
       if (currentUser == null) {
         throw Exception('No user logged in');
       }
+      final userId = currentUser.uid;
 
-      final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+      //final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
       // Get the task details
       final taskDoc = await _firestore
@@ -404,8 +410,9 @@ class ToDoTaskService {
       if (currentUser == null) {
         throw Exception('No user logged in');
       }
+      final userId = currentUser.uid;
 
-      final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+      // final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
       // Get the task details
       final taskDoc = await _firestore
@@ -525,6 +532,7 @@ class ToDoTaskService {
       if (currentUser == null) {
         throw Exception('No user logged in');
       }
+      final userId = currentUser.uid;
 
       //final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
@@ -561,7 +569,6 @@ class ToDoTaskService {
         // Increment count for new list
         await _listService.incrementTaskCount(targetListId);
       }
-
     } catch (e) {
       print('Error moving task: $e');
       rethrow;
@@ -571,7 +578,13 @@ class ToDoTaskService {
   /// Checks if a list exists for the current user
   Future<String?> getListIdByName(String listName) async {
     try {
-      final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
+      final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('No user logged in');
+      }
+      final userId = currentUser.uid;
+
+//      final userId = "NshL9WP7s7PyGofRZgJNUlbai6v2";
 
       final querySnapshot = await _firestore
           .collection('toDoLists')
@@ -590,5 +603,4 @@ class ToDoTaskService {
       rethrow;
     }
   }
-
 }
