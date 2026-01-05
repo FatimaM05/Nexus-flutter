@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import '../../services/todo_list_services.dart';
+import '../../models/todo_task_model.dart';
+import '../../models/todo_list_model.dart';
 
 class DashboardScreen extends StatefulWidget {
   final VoidCallback goToTodo;
   final String username;
-  const DashboardScreen({super.key, required this.goToTodo, required this.username,});
+  const DashboardScreen({
+    super.key,
+    required this.goToTodo,
+    required this.username,
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -15,10 +22,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
   File? _highlightImage;
   final ImagePicker _picker = ImagePicker();
   final TextEditingController _journalController = TextEditingController();
+  final ToDoListService _toDoListService = ToDoListService();
+
+  //getting the id of 'My Day' list to fetch and display its tasks
+  String? _myDayListId;
+  List<ToDoTaskModel> _todaysTasks = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMyDayTasks();
+  }
+
+  Future<void> _loadMyDayTasks() async {
+    try {
+      // Listen to lists to find "My Day" list ID
+      _toDoListService.listenToLists().listen((lists) {
+        final myDayList = lists.firstWhere(
+          (list) => list.name == 'My Day',
+          orElse: () => ToDoListModel(
+            id: '',
+            name: '',
+            numberOfTasks: 0,
+            isDefault: false,
+          ),
+        );
+
+        if (myDayList.id.isNotEmpty && myDayList.id != _myDayListId) {
+          setState(() {
+            _myDayListId = myDayList.id;
+          });
+
+          // Now fetch tasks for this list
+          _toDoListService.fetchAllTasks(myDayList.id).listen((tasks) {
+            setState(() {
+              _todaysTasks = tasks
+                  .where((task) => task.completionStatus == 0)
+                  .take(3)
+                  .toList();
+            });
+          });
+        }
+      });
+    } catch (e) {
+      print('Error loading My Day tasks: $e');
+    }
+  }
 
   Future<void> _pickHighlightImage() async {
-    final XFile? pickedFile =
-        await _picker.pickImage(source: ImageSource.gallery);
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.gallery,
+    );
 
     if (pickedFile != null) {
       setState(() {
@@ -50,20 +104,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 24),
             _buildCard(
               title: "Today's Tasks",
-              trailing: const Icon(Icons.calendar_today_outlined,
-                  color: Color(0xFFA5A5BC)),
+              trailing: const Icon(
+                Icons.calendar_today_outlined,
+                color: Color(0xFFA5A5BC),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _taskItem("Review uni tasks"),
-                  _taskItem("Die"),
-                  _taskItem("Call mom"),
+                  if (_todaysTasks.isEmpty)
+                    const Padding(
+                      padding: EdgeInsets.only(bottom: 12),
+                      child: Text(
+                        "No tasks for today",
+                        style: TextStyle(color: Colors.grey),
+                      ),
+                    )
+                  else
+                    ..._todaysTasks.map((task) => _taskItem(task.name)),
                   const SizedBox(height: 8),
                   GestureDetector(
                     onTap: widget.goToTodo,
-                    child: const Text(
-                      "See more",
-                      style: TextStyle(
+                    child: Text(
+                      _todaysTasks.isEmpty ? 'Add Tasks' : "See more",
+                      style: const TextStyle(
                         color: Color(0xFFA5A5BC),
                         fontWeight: FontWeight.w500,
                       ),
@@ -75,8 +138,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
             const SizedBox(height: 16),
             _buildCard(
               title: "Today's Journal",
-              trailing:
-                  const Text("Dec 8", style: TextStyle(color: Colors.grey)),
+              trailing: const Text(
+                "Dec 8",
+                style: TextStyle(color: Colors.grey),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -114,8 +179,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   child: _highlightImage == null
                       ? const Center(
-                          child: Icon(Icons.add,
-                              size: 40, color: Colors.grey),
+                          child: Icon(Icons.add, size: 40, color: Colors.grey),
                         )
                       : ClipRRect(
                           borderRadius: BorderRadius.circular(12),
@@ -134,8 +198,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
     );
   }
-   Widget _buildCard(
-      {required String title, required Widget child, Widget? trailing}) {
+
+  Widget _buildCard({
+    required String title,
+    required Widget child,
+    Widget? trailing,
+  }) {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -174,7 +242,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          Text(text),
+          Expanded(child: Text(text, overflow: TextOverflow.ellipsis)),
         ],
       ),
     );
