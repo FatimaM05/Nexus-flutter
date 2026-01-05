@@ -4,13 +4,16 @@ import 'package:image_picker/image_picker.dart';
 import '../../services/todo_list_services.dart';
 import '../../models/todo_task_model.dart';
 import '../../models/todo_list_model.dart';
+import '../journal/journal_list_page.dart';
 
 class DashboardScreen extends StatefulWidget {
   final VoidCallback goToTodo;
+  final VoidCallback goToJournal;
   final String username;
   const DashboardScreen({
     super.key,
     required this.goToTodo,
+    required this.goToJournal,
     required this.username,
   });
 
@@ -146,7 +149,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    "Help me guys im done with university",
+                    "Your most recent journal entry.",
                     style: TextStyle(
                       color: Colors.grey,
                       fontSize: 13,
@@ -154,12 +157,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  TextField(
-                    controller: _journalController,
-                    maxLines: 4,
-                    decoration: const InputDecoration(
-                      hintText: "What’s on your mind?",
-                      border: InputBorder.none,
+                  // TextField(
+                  //   controller: _journalController,
+                  //   maxLines: 4,
+                  //   decoration: const InputDecoration(
+                  //     hintText: "What’s on your mind?",
+                  //     border: InputBorder.none,
+                  //   ),
+                  // ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context, MaterialPageRoute(builder: (context) => JournalListPage()));
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 5,
+                      ),
+                      // decoration: BoxDecoration(
+                      //   borderRadius: BorderRadius.circular(8),
+                      //   border: Border.all(color: Colors.grey.shade300),
+                      // ),
+                      child: const Text(
+                        "What’s on your mind?",
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ),
                   ),
                 ],
