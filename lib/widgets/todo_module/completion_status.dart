@@ -40,7 +40,7 @@ class _CompletionStatusState extends State<CompletionStatus> {
               (task) => Padding(
                 //the padding widget will add padding around each individual task tile creating spacing between tasks
                 padding: EdgeInsets.only(bottom: 8.0),
-                child: TaskTile(task: task),
+                child: TaskTile(task: task, listId: task.listId),
               ),
             )
             .toList(),

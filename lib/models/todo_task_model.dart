@@ -1,17 +1,32 @@
 class ToDoTaskModel {
-  final int id;
+  final String id;
   String name;
   int completionStatus; //0 for incomplete, 1 for complete
   String? notes;
+  String listId;
+  bool isImportant;
+  bool isMyDay;
 
   ToDoTaskModel({
     required this.id,
+    required this.listId,
     required this.name,
     required this.completionStatus,
+    this.isImportant = false,
+    this.isMyDay = false,
     this.notes,
   });
 
-  //method to convert firebase entries  into objects of this class
-
-  //method to convert object of this class in a format that firebase can understand before storing
+  // Convert Firestore document to ToDoTaskModel
+  factory ToDoTaskModel.fromFirestore(Map<String, dynamic> data, String docId) {
+    return ToDoTaskModel(
+      id: docId,
+      name: data['taskName'] ?? '',
+      completionStatus: data['completionStatus'] ?? 0,
+      notes: data['notes'],
+      listId: data['listId'],
+      isImportant: data['isImportant'] ?? false,
+      isMyDay: data['isMyDay'] ?? false,
+    );
+  }
 }

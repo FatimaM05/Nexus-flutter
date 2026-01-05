@@ -1,16 +1,13 @@
 class ToDoListModel {
-  final int id;
-  final String name;
-  final int numberOfTasks;
+  final String id;
+  String name;
+  int numberOfTasks;
+  final bool isDefault;
 
   ToDoListModel({
     required this.id,
     required this.name,
     required this.numberOfTasks,
+    this.isDefault = false,
   });
-
-  //method to get data from firebase and convert it into objects of this class
-
-  //method to convert object of this class in a format that firebase can understand before storing
-
 }

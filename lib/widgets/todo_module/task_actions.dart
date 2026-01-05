@@ -7,14 +7,8 @@ class TaskActions extends StatelessWidget {
 
   IconData _getIcon() {
     switch (actionName) {
-      case 'Mark as Important':
-        return Icons.star_outline;
-      case 'Repeat':
-        return Icons.repeat;
       case 'Move to List':
         return Icons.summarize_outlined;
-      case 'Add to My Day':
-        return Icons.light_mode_outlined;
       default:
         return Icons.help_outline;
     }
