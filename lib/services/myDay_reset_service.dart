@@ -6,16 +6,13 @@ import './todo_list_services.dart';
 class MyDayResetService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final ToDoListService _listService = ToDoListService();
+  //final ToDoListService _listService = ToDoListService();
 
   static const String resetTaskName = "myDayReset";
 
   /// Initialize the background task
   static void initialize() {
-    Workmanager().initialize(
-      callbackDispatcher,
-      isInDebugMode: false,
-    );
+    Workmanager().initialize(callbackDispatcher, isInDebugMode: false);
 
     // Schedule daily reset at midnight
     _scheduleNextReset();
@@ -31,9 +28,7 @@ class MyDayResetService {
       resetTaskName,
       resetTaskName,
       initialDelay: delay,
-      constraints: Constraints(
-        networkType: NetworkType.connected,
-      ),
+      constraints: Constraints(networkType: NetworkType.connected),
     );
 
     print('Next My Day reset scheduled for: $nextMidnight');
@@ -128,7 +123,9 @@ class MyDayResetService {
         'updatedAt': FieldValue.serverTimestamp(),
       });
 
-      print('My Day reset complete. Removed ${myDayTasksSnapshot.docs.length} tasks');
+      print(
+        'My Day reset complete. Removed ${myDayTasksSnapshot.docs.length} tasks',
+      );
       print('Incomplete tasks removed: $incompleteTasksRemoved');
 
       // Schedule next reset

@@ -359,7 +359,10 @@ class _TaskDetailState extends State<TaskDetail> {
                         borderSide: BorderSide(color: Color(0xFF999999)),
                       ),
                       focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFFA09CB0), width: 1),
+                        borderSide: BorderSide(
+                          color: Color(0xFFA09CB0),
+                          width: 1,
+                        ),
                       ),
                       errorText: errorMessage.isEmpty ? null : errorMessage,
                     ),
