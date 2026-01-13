@@ -77,6 +77,3 @@ The app is designed using a modular architecture with clear separation between U
 
 ---
 
-
-## 📄 License
-This project is intended for **educational and portfolio purposes only**.
